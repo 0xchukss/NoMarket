@@ -1,0 +1,35 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NoMarket
+    network: sepolia
+    source:
+      address: "0x9513bde114EA51A34B6d60D89B1DebE06Ecf5F71"
+      abi: NoMarket
+      startBlock: 10821029
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Bet
+        - ResolutionProposal
+        - MarketResolution
+      abis:
+        - name: NoMarket
+          file: ./abis/NoMarket.json
+      eventHandlers:
+        - event: MarketCreated(indexed uint256,indexed address,string,string,uint16)
+          handler: handleMarketCreated
+        - event: BetPlaced(indexed uint256,indexed uint256,indexed address,uint256,bytes32,bytes32,bytes32)
+          handler: handleBetPlaced
+        - event: UmaResolutionProposed(indexed uint256,indexed bytes32,uint16,string)
+          handler: handleUmaResolutionProposed
+        - event: MarketResolved(indexed uint256,uint16)
+          handler: handleMarketResolved
+      file: ./src/no-market.ts

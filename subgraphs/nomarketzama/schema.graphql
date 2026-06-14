@@ -1,0 +1,59 @@
+type Market @entity(immutable: false) {
+  id: ID!
+  marketId: BigInt!
+  creator: Bytes!
+  title: String!
+  question: String!
+  atomCount: Int!
+  resolved: Boolean!
+  outcomeVector: BigInt!
+  assertionId: Bytes
+  totalStake: BigInt!
+  betCount: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+  transactionHash: Bytes!
+  bets: [Bet!]! @derivedFrom(field: "market")
+  resolutions: [ResolutionProposal!]! @derivedFrom(field: "market")
+}
+
+type Bet @entity(immutable: true) {
+  id: ID!
+  market: Market!
+  marketId: BigInt!
+  betId: BigInt!
+  bettor: Bytes!
+  stake: BigInt!
+  publicStake: BigInt!
+  encryptedStakeHandle: Bytes!
+  encryptedOutcomeMaskHandle: Bytes!
+  encryptedCareMaskHandle: Bytes!
+  outcomeMask: BigInt!
+  careMask: BigInt!
+  expression: String!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+}
+
+type ResolutionProposal @entity(immutable: true) {
+  id: ID!
+  market: Market!
+  marketId: BigInt!
+  assertionId: Bytes!
+  outcomeVector: BigInt!
+  claim: String!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+}
+
+type MarketResolution @entity(immutable: true) {
+  id: ID!
+  market: Market!
+  marketId: BigInt!
+  outcomeVector: BigInt!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+}

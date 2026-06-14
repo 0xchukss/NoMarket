@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/uma-bot/run-due-markets",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}

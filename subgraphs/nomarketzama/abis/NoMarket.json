@@ -1,0 +1,48 @@
+[
+  {
+    "type": "event",
+    "name": "MarketCreated",
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "marketId", "type": "uint256" },
+      { "indexed": true, "name": "creator", "type": "address" },
+      { "indexed": false, "name": "title", "type": "string" },
+      { "indexed": false, "name": "question", "type": "string" },
+      { "indexed": false, "name": "atomCount", "type": "uint16" }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "BetPlaced",
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "marketId", "type": "uint256" },
+      { "indexed": true, "name": "betId", "type": "uint256" },
+      { "indexed": true, "name": "bettor", "type": "address" },
+      { "indexed": false, "name": "publicStake", "type": "uint256" },
+      { "indexed": false, "name": "encryptedStakeHandle", "type": "bytes32" },
+      { "indexed": false, "name": "encryptedOutcomeMaskHandle", "type": "bytes32" },
+      { "indexed": false, "name": "encryptedCareMaskHandle", "type": "bytes32" }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "UmaResolutionProposed",
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "marketId", "type": "uint256" },
+      { "indexed": true, "name": "assertionId", "type": "bytes32" },
+      { "indexed": false, "name": "outcomeVector", "type": "uint16" },
+      { "indexed": false, "name": "claim", "type": "string" }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "MarketResolved",
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "name": "marketId", "type": "uint256" },
+      { "indexed": false, "name": "outcomeVector", "type": "uint16" }
+    ]
+  }
+]

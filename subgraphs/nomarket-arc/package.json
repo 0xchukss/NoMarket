@@ -1,0 +1,16 @@
+{
+  "name": "nomarket-arc-subgraph",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "auth": "node -e \"console.log('Run: npx graph auth YOUR_DEPLOY_KEY')\"",
+    "deploy": "graph deploy nomarket-arc --version-label 0.0.1"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.98.1",
+    "@graphprotocol/graph-ts": "^0.38.1"
+  },
+  "devDependencies": {}
+}
