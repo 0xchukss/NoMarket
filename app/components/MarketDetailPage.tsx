@@ -390,7 +390,7 @@ function getBetResultLabel(input: {
   isPublicLive: boolean;
 }) {
   const vector = input.resolution?.outcomeVector;
-  if (!input.resolution?.resolved || vector === undefined) {
+  if (vector === undefined) {
     return { label: "Pending result", tone: "pending" as const };
   }
   if (!input.isPublicLive || input.bet.outcomeMask === undefined || input.bet.careMask === undefined) {
@@ -989,7 +989,7 @@ export function BetHistory({ market, onVolumeChange }: { market: CreatedMarket; 
   const visibleBets = historyTab === "personal" ? personalBets : bets;
   const totalStaked = bets.reduce((sum, bet) => sum + bet.publicStake, 0n);
   const personalStaked = personalBets.reduce((sum, bet) => sum + bet.publicStake, 0n);
-  const outcomeText = resolutionState?.resolved
+  const outcomeText = resolutionState?.outcomeVector !== undefined
     ? `Outcome vector ${resolutionState.outcomeVector ?? "resolved"}`
     : resolutionState?.assertionId
       ? "UMA result pending"
@@ -1102,7 +1102,7 @@ export function BetHistory({ market, onVolumeChange }: { market: CreatedMarket; 
                   </div>
                   <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:justify-end">
                     <span className={`rounded-lg px-2 py-1 text-[10px] font-black ${betResultClass(result.tone)}`}>{result.label}</span>
-                    <span className="rounded-lg bg-emerald-500/15 px-2 py-1 text-[10px] font-black text-emerald-300">Confirmed</span>
+                    <span className="rounded-lg bg-emerald-500/15 px-2 py-1 text-[10px] font-black text-emerald-300">Bet confirmed</span>
                     <span className="font-mono text-[10px] text-slate-600">{shortAddress(bet.transactionHash)}</span>
                   </div>
                 </div>
@@ -1268,68 +1268,7 @@ export function UmaResolutionPanel({ market, onChange }: { market: CreatedMarket
     };
   }, [activeAssertionId, isLiveEvmChain, market, market.onchain.chainId, market.onchain.materialized, market.onchain.marketId, resolved]);
 
-  return (
-    <section className="mt-5 rounded-2xl border border-white/8 bg-card p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-black text-white">UMA resolver bot</h2>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            Resolution is automated. The bot watches the market atoms, submits the optimistic assertion, and tracks settlement without user input.
-          </p>
-        </div>
-        <span
-          className={
-            botStatus === "resolved"
-              ? "rounded-lg bg-emerald-500/15 px-2 py-1 text-[10px] font-black uppercase text-emerald-300"
-              : botStatus === "proposed"
-                ? "rounded-lg bg-violet-500/15 px-2 py-1 text-[10px] font-black uppercase text-violet-200"
-                : botStatus === "watching"
-                  ? "rounded-lg bg-blue-500/15 px-2 py-1 text-[10px] font-black uppercase text-blue-300"
-                  : botStatus === "scheduled"
-                    ? "rounded-lg bg-amber-500/15 px-2 py-1 text-[10px] font-black uppercase text-amber-200"
-                    : "rounded-lg bg-white/[0.04] px-2 py-1 text-[10px] font-black uppercase text-slate-400"
-          }
-        >
-          {botStatusLabel}
-        </span>
-      </div>
-
-      {!isLiveEvmChain && (
-        <p className="mt-3 rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs font-bold leading-5 text-amber-100">
-          {chain.setupMessage || `${chain.name} resolver automation is setup-pending for this beta.`}
-        </p>
-      )}
-
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
-          <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Bot state</p>
-          <p className="mt-1 text-sm font-black text-white">{botStatusLabel}</p>
-          <p className="mt-2 text-[11px] leading-5 text-slate-500">
-            {botMessage || (resolutionReady ? "No manual resolution controls are required." : `Scheduled for ${formatLifecycleDate(market.lifecycle.resolutionTime)}.`)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
-          <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Outcome vector</p>
-          <p className="mt-1 text-sm font-black text-white">{displayedVector ?? "Pending"}</p>
-          <p className="mt-2 font-mono text-[11px] text-slate-500">{formatOutcomeVectorBinary(displayedVector, market.atoms.length)}</p>
-        </div>
-        <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
-          <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">UMA assertion</p>
-          <p className="mt-1 break-all font-mono text-[11px] font-bold text-slate-300">
-            {activeAssertionId ? shortAddress(activeAssertionId) : "Pending bot proposal"}
-          </p>
-          <p className="mt-2 text-[11px] leading-5 text-slate-500">Network: {chain.shortName}</p>
-        </div>
-      </div>
-
-      {(proposalTx || resolvedTx) && (
-        <div className="mt-3 rounded-xl border border-white/7 bg-[#0b1219] p-3">
-          {proposalTx && <p className="break-all font-mono text-[10px] leading-5 text-slate-500">Proposal tx: {proposalTx}</p>}
-          {resolvedTx && <p className="break-all font-mono text-[10px] leading-5 text-emerald-400">Resolved tx: {resolvedTx}</p>}
-        </div>
-      )}
-    </section>
-  );
+  return null;
 }
 
 export function MarketHeader({ market, marketId, chainName }: { market: MarketDetail; marketId: string; chainName: string }) {

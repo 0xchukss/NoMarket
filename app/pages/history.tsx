@@ -36,7 +36,7 @@ function shortAddress(address: string) {
 }
 
 function resultForBet(bet: HistoryBet, resolution?: ResolutionState) {
-  if (!resolution?.resolved || resolution.outcomeVector === undefined) return { label: "Pending result", className: "bg-amber-500/15 text-amber-200" };
+  if (resolution?.outcomeVector === undefined) return { label: "Pending result", className: "bg-amber-500/15 text-amber-200" };
   if (bet.outcomeMask === undefined || bet.careMask === undefined) return { label: "Resolved privately", className: "bg-violet-500/15 text-violet-200" };
   const matched = (resolution.outcomeVector & Number(bet.careMask)) === Number(bet.outcomeMask);
   return matched ? { label: "Won", className: "bg-emerald-500/15 text-emerald-300" } : { label: "Lost", className: "bg-red-500/15 text-red-300" };
