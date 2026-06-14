@@ -15,7 +15,8 @@ contract DeployArc is Script {
         address ooV2 = vm.envOr("UMA_OOV2_ADDRESS_ARC", address(0));
         address collateral = vm.envOr("ARC_UMA_COLLATERAL_ADDRESS", address(0));
         uint256 liveness = vm.envOr("ARC_UMA_LIVENESS_SECONDS", uint256(60));
-        uint256 creationDeposit = vm.envOr("ARC_MARKET_CREATION_DEPOSIT_WEI", uint256(0));
+        uint256 creationFee = vm.envOr("ARC_MARKET_CREATION_DEPOSIT_WEI", uint256(5 ether));
+        uint256 betFeeBps = vm.envOr("ARC_BET_FEE_BPS", uint256(200));
 
         vm.startBroadcast(deployerKey);
         if (oracle == address(0)) {
@@ -25,7 +26,7 @@ contract DeployArc is Script {
                 oracle = address(new MockOOv3());
             }
         }
-        noMarket = new NoMarketArc(oracle, creationDeposit);
+        noMarket = new NoMarketArc(oracle, creationFee, betFeeBps);
         vm.stopBroadcast();
     }
 }

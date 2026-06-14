@@ -10,7 +10,7 @@ export const arcNoMarketAbi = [
   {
     type: "function",
     name: "createMarket",
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     inputs: [
       { name: "title", type: "string" },
       { name: "metadata", type: "string" },
@@ -59,6 +59,56 @@ export const arcNoMarketAbi = [
   },
   {
     type: "function",
+    name: "placeBetMinterms",
+    stateMutability: "payable",
+    inputs: [
+      { name: "marketId", type: "uint256" },
+      { name: "outcomeMasks", type: "uint256[]" },
+      { name: "careMasks", type: "uint256[]" },
+      { name: "expression", type: "string" }
+    ],
+    outputs: [{ name: "betId", type: "uint256" }]
+  },
+  {
+    type: "function",
+    name: "claimBet",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "betId", type: "uint256" }],
+    outputs: [{ name: "payout", type: "uint256" }]
+  },
+  {
+    type: "function",
+    name: "claimBets",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "betIds", type: "uint256[]" }],
+    outputs: [{ name: "claimedCount", type: "uint256" }]
+  },
+  {
+    type: "function",
+    name: "claimablePayout",
+    stateMutability: "view",
+    inputs: [{ name: "betId", type: "uint256" }],
+    outputs: [{ name: "payout", type: "uint256" }]
+  },
+  {
+    type: "function",
+    name: "betMinterms",
+    stateMutability: "view",
+    inputs: [{ name: "betId", type: "uint256" }],
+    outputs: [
+      { name: "outcomeMasks", type: "uint256[]" },
+      { name: "careMasks", type: "uint256[]" }
+    ]
+  },
+  {
+    type: "function",
+    name: "fundMarketRewards",
+    stateMutability: "payable",
+    inputs: [{ name: "marketId", type: "uint256" }],
+    outputs: []
+  },
+  {
+    type: "function",
     name: "proposeResolution",
     stateMutability: "nonpayable",
     inputs: [
@@ -80,7 +130,15 @@ export const arcNoMarketAbi = [
       { name: "atomCount", type: "uint8" },
       { name: "resolved", type: "bool" },
       { name: "outcomeVector", type: "uint256" },
-      { name: "assertionId", type: "bytes32" }
+      { name: "assertionId", type: "bytes32" },
+      { name: "tradingEndTime", type: "uint64" },
+      { name: "eventOccurrenceTime", type: "uint64" },
+      { name: "resolutionTime", type: "uint64" },
+      { name: "creationFeePaid", type: "uint256" },
+      { name: "totalStake", type: "uint256" },
+      { name: "totalFees", type: "uint256" },
+      { name: "rewardPool", type: "uint256" },
+      { name: "creatorFeesPaid", type: "bool" }
     ]
   },
   {
@@ -131,6 +189,38 @@ export const arcNoMarketAbi = [
   },
   {
     type: "event",
+    name: "BetMinterm",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "betId", type: "uint256" },
+      { indexed: true, name: "mintermIndex", type: "uint16" },
+      { indexed: false, name: "outcomeMask", type: "uint256" },
+      { indexed: false, name: "careMask", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
+    name: "BetFeeCollected",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "betId", type: "uint256" },
+      { indexed: false, name: "fee", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
+    name: "MarketCreationFeePaid",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "creator", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
     name: "UmaResolutionProposed",
     anonymous: false,
     inputs: [
@@ -147,6 +237,27 @@ export const arcNoMarketAbi = [
     inputs: [
       { indexed: true, name: "marketId", type: "uint256" },
       { indexed: false, name: "outcomeVector", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
+    name: "BetClaimed",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "betId", type: "uint256" },
+      { indexed: true, name: "bettor", type: "address" },
+      { indexed: false, name: "payout", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
+    name: "CreatorFeesPaid",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "creator", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" }
     ]
   }
 ] as const;

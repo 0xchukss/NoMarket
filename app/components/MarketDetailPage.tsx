@@ -39,7 +39,9 @@ import {
 import {
   buildOnchainMarketMetadata,
   formatLifecycleDate,
+  getBetFeeBpsForChain,
   getCreationDepositWeiForChain,
+  getGrossBetValueFromStake,
   getLifecyclePhase,
   isResolutionReady,
   isTradingOpen,
@@ -62,14 +64,23 @@ type BetHistoryItem = {
   betId: bigint;
   bettor: string;
   publicStake: bigint;
+  fee?: bigint;
+  claimed?: boolean;
+  payout?: bigint;
   encryptedStakeHandle?: string;
   encryptedOutcomeMaskHandle?: string;
   encryptedCareMaskHandle?: string;
   outcomeMask?: bigint;
   careMask?: bigint;
+  minterms?: Array<{ outcomeMask: bigint; careMask: bigint }>;
   expression?: string;
   transactionHash: string;
   blockTimestamp?: string;
+};
+
+type SubgraphMintermNode = {
+  outcomeMask: string;
+  careMask: string;
 };
 
 type SubgraphBetNode = {
@@ -77,11 +88,15 @@ type SubgraphBetNode = {
   bettor: string;
   publicStake?: string;
   stake?: string;
+  fee?: string;
+  claimed?: boolean;
+  payout?: string;
   encryptedStakeHandle?: string;
   encryptedOutcomeMaskHandle?: string;
   encryptedCareMaskHandle?: string;
   outcomeMask?: string;
   careMask?: string;
+  minterms?: SubgraphMintermNode[];
   expression?: string;
   transactionHash?: string;
   blockTimestamp?: string;
@@ -118,6 +133,9 @@ const zamaBetHistorySubgraphQuery = `
       bettor
       publicStake
       stake
+      fee
+      claimed
+      payout
       encryptedStakeHandle
       encryptedOutcomeMaskHandle
       encryptedCareMaskHandle
@@ -137,8 +155,15 @@ const publicBetHistorySubgraphQuery = `
       bettor
       publicStake
       stake
+      fee
+      claimed
+      payout
       outcomeMask
       careMask
+      minterms {
+        outcomeMask
+        careMask
+      }
       expression
       transactionHash
       blockTimestamp
@@ -173,11 +198,18 @@ function mapSubgraphBet(node: SubgraphBetNode, isPublicChain: boolean): BetHisto
     betId: BigInt(node.betId || 0),
     bettor: node.bettor,
     publicStake: BigInt(node.publicStake || node.stake || 0),
+    fee: node.fee ? BigInt(node.fee) : undefined,
+    claimed: node.claimed,
+    payout: node.payout ? BigInt(node.payout) : undefined,
     encryptedStakeHandle: node.encryptedStakeHandle,
     encryptedOutcomeMaskHandle: node.encryptedOutcomeMaskHandle,
     encryptedCareMaskHandle: node.encryptedCareMaskHandle,
     outcomeMask: node.outcomeMask ? BigInt(node.outcomeMask) : undefined,
     careMask: node.careMask ? BigInt(node.careMask) : undefined,
+    minterms: node.minterms?.map((minterm) => ({
+      outcomeMask: BigInt(minterm.outcomeMask || 0),
+      careMask: BigInt(minterm.careMask || 0)
+    })),
     expression: isPublicChain ? node.expression : undefined,
     transactionHash: node.transactionHash || "0x0000000000000000000000000000000000000000000000000000000000000000",
     blockTimestamp: node.blockTimestamp
@@ -396,9 +428,10 @@ function getBetResultLabel(input: {
   if (!input.isPublicLive || input.bet.outcomeMask === undefined || input.bet.careMask === undefined) {
     return { label: "Resolved privately", tone: "private" as const };
   }
-  const outcomeMask = Number(input.bet.outcomeMask);
-  const careMask = Number(input.bet.careMask);
-  const matched = (vector & careMask) === outcomeMask;
+  const minterms = input.bet.minterms?.length
+    ? input.bet.minterms
+    : [{ outcomeMask: input.bet.outcomeMask, careMask: input.bet.careMask }];
+  const matched = minterms.some((minterm) => (vector & Number(minterm.careMask)) === Number(minterm.outcomeMask));
   return matched ? { label: "Won", tone: "won" as const } : { label: "Lost", tone: "lost" as const };
 }
 
@@ -668,7 +701,7 @@ function MarketLifecyclePanel({ market }: { market: CreatedMarket }) {
         : phase === "buffer"
           ? "Resolution buffer"
           : "Resolver ready";
-  const deposit = BigInt(market.lifecycle.creationDepositWei || "0");
+  const creationFee = BigInt(market.lifecycle.creationDepositWei || "0");
 
   return (
     <section className="mt-5 rounded-2xl border border-white/8 bg-card p-4">
@@ -699,12 +732,12 @@ function MarketLifecyclePanel({ market }: { market: CreatedMarket }) {
           <p className="mt-2 text-[11px] text-slate-500">{market.lifecycle.resolutionBufferMinutes} minute buffer</p>
         </div>
         <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
-          <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Creation deposit</p>
+          <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Creation fee</p>
           <p className="mt-1 text-sm font-black text-white">
-            {deposit > 0n ? `${deposit.toString()} wei` : "Not required"}
+            {creationFee > 0n ? `${creationFee.toString()} wei` : "Not required"}
           </p>
           <p className="mt-2 text-[11px] text-slate-500">
-            {deposit > 0n ? `Refunded on clean ${chain.shortName} resolution.` : `${chain.shortName} currently has no deposit configured.`}
+            {creationFee > 0n ? `Required to create a ${chain.shortName} market.` : `${chain.shortName} currently has no creation fee configured.`}
           </p>
         </div>
       </div>
@@ -768,6 +801,7 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
               abi: arcNoMarketAbi,
               functionName: "createMarket",
               args: [market.title, metadata, market.atoms.length],
+              value: BigInt(lifecycle.creationDepositWei || "0"),
               chain: writeChain,
               account: address
             });
@@ -801,14 +835,32 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
         return;
       }
       const contract = requireNoMarketContractAddress(chain);
-      const hash = await writeContractAsync({
-        address: contract,
-        abi: noMarketAbi,
-        functionName: "createMarket",
-        args: [market.title, metadata, market.atoms.length],
-        chain: writeChain,
-        account: address
-      });
+      const hash = supportsTimedMarketCreation(chain.id)
+        ? await writeContractAsync({
+            address: contract,
+            abi: noMarketAbi,
+            functionName: "createTimedMarket",
+            args: [
+              market.title,
+              metadata,
+              market.atoms.length,
+              lifecycleToUnixSeconds(lifecycle.tradingEndTime),
+              lifecycleToUnixSeconds(lifecycle.eventOccurrenceTime),
+              BigInt(Math.floor(lifecycle.resolutionBufferMinutes * 60))
+            ],
+            value: BigInt(lifecycle.creationDepositWei || "0"),
+            chain: writeChain,
+            account: address
+          })
+        : await writeContractAsync({
+            address: contract,
+            abi: noMarketAbi,
+            functionName: "createMarket",
+            args: [market.title, metadata, market.atoms.length],
+            value: BigInt(lifecycle.creationDepositWei || "0"),
+            chain: writeChain,
+            account: address
+          });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       const createdLog = receipt?.logs
         .map((log) => {
@@ -1096,12 +1148,22 @@ export function BetHistory({ market, onVolumeChange }: { market: CreatedMarket; 
                     <p className="mt-1 line-clamp-2 text-[10px] text-slate-500">{getBetPositionSummary(bet, isPublicLive)}</p>
                     <p className="mt-1 break-all font-mono text-[10px] text-slate-600">
                       {isPublicLive
-                        ? `mask ${bet.outcomeMask?.toString() || "0"} / care ${bet.careMask?.toString() || "0"}`
+                        ? bet.minterms?.length
+                          ? `${bet.minterms.length} minterm${bet.minterms.length === 1 ? "" : "s"}`
+                          : `mask ${bet.outcomeMask?.toString() || "0"} / care ${bet.careMask?.toString() || "0"}`
                         : shortAddress(bet.encryptedOutcomeMaskHandle || "0x0000000000000000000000000000000000000000")}
                     </p>
                   </div>
                   <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:justify-end">
                     <span className={`rounded-lg px-2 py-1 text-[10px] font-black ${betResultClass(result.tone)}`}>{result.label}</span>
+                    {bet.payout && bet.payout > 0n && (
+                      <span className="rounded-lg bg-blue-500/15 px-2 py-1 text-[10px] font-black text-blue-200">
+                        Paid {formatEther(bet.payout)} {chain.nativeCurrency}
+                      </span>
+                    )}
+                    {bet.claimed && (!bet.payout || bet.payout === 0n) && (
+                      <span className="rounded-lg bg-slate-500/15 px-2 py-1 text-[10px] font-black text-slate-300">Claimed</span>
+                    )}
                     <span className="rounded-lg bg-emerald-500/15 px-2 py-1 text-[10px] font-black text-emerald-300">Bet confirmed</span>
                     <span className="font-mono text-[10px] text-slate-600">{shortAddress(bet.transactionHash)}</span>
                   </div>
@@ -1423,6 +1485,7 @@ export function CombiTradePanel({
   const atomInputs = useMemo(() => atoms.map((atom) => ({ description: atom.description })), [atoms]);
   const probability = useMemo(() => expressionProbability(minterms, q, 120), [minterms, q]);
   const cost = useMemo(() => costOfBet(minterms, q, 120, Number(amount || 0)), [amount, minterms, q]);
+  const feeBps = getBetFeeBpsForChain(chain.id);
   const canBuild = minterms.length > 0 && Number(amount) > 0;
   const marketReady = Boolean(isLiveEvmChain && market?.onchain.materialized && market.onchain.marketId);
   const tradingOpen = !market || isTradingOpen(market.lifecycle, now);
@@ -1489,6 +1552,7 @@ export function CombiTradePanel({
 
     try {
       const stakeWei = parseEther(amount);
+      const grossValueWei = getGrossBetValueFromStake(stakeWei, chain.id);
       setSubmittedStakeWei(stakeWei);
       const expression = mergeMinterms(minterms);
       const writeChain = getNoMarketWriteChain(chain);
@@ -1500,9 +1564,14 @@ export function CombiTradePanel({
         const hash = await writeContractAsync({
           address: requireNoMarketContractAddress(chain),
           abi: arcNoMarketAbi,
-          functionName: "placeBet",
-          args: [BigInt(market.onchain.marketId), BigInt(expression.outcomeMask), BigInt(expression.careMask), preview],
-          value: stakeWei,
+          functionName: "placeBetMinterms",
+          args: [
+            BigInt(market.onchain.marketId),
+            minterms.map((minterm) => BigInt(minterm.outcomeMask)),
+            minterms.map((minterm) => BigInt(minterm.careMask)),
+            preview
+          ],
+          value: grossValueWei,
           chain: writeChain,
           account: address
         });
@@ -1533,7 +1602,7 @@ export function CombiTradePanel({
           bytesToHex(encrypted.handles[2]!),
           bytesToHex(encrypted.inputProof)
         ],
-        value: stakeWei,
+        value: grossValueWei,
         chain: writeChain,
         account: address
       });
@@ -1598,6 +1667,15 @@ export function CombiTradePanel({
           <p className="mt-1 text-xl font-black text-white">{cost.toFixed(3)} {chain.nativeCurrency}</p>
         </div>
       </div>
+
+      {feeBps > 0 && (
+        <div className="mt-3 rounded-xl border border-amber-300/15 bg-amber-300/8 p-3">
+          <p className="text-[10px] font-black uppercase tracking-wide text-amber-200">Protocol fee</p>
+          <p className="mt-1 text-xs leading-5 text-slate-300">
+            {feeBps / 100}% is added to the wallet spend. 10% of collected market fees goes to this market creator after resolution.
+          </p>
+        </div>
+      )}
 
       <label className="mt-4 block text-xs font-black text-slate-400" htmlFor="combi-stake">Stake</label>
       <div className="mt-2 flex rounded-xl border border-white/8 bg-[#0b1219]">

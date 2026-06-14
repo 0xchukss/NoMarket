@@ -66,6 +66,21 @@ export function getCreationDepositWeiForChain(chainId: ChainId) {
   return BigInt(deposits[chainId] || process.env.NEXT_PUBLIC_MARKET_CREATION_DEPOSIT_WEI || "0");
 }
 
+export function getBetFeeBpsForChain(chainId: ChainId) {
+  const fees: Record<ChainId, string | undefined> = {
+    zama: process.env.NEXT_PUBLIC_ZAMA_BET_FEE_BPS,
+    arc: process.env.NEXT_PUBLIC_ARC_BET_FEE_BPS
+  };
+  const parsed = Number(fees[chainId] || process.env.NEXT_PUBLIC_BET_FEE_BPS || "0");
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.floor(parsed), 2_000) : 0;
+}
+
+export function getGrossBetValueFromStake(stakeWei: bigint, chainId: ChainId) {
+  const bps = BigInt(getBetFeeBpsForChain(chainId));
+  if (bps === 0n) return stakeWei;
+  return stakeWei + (stakeWei * bps + 9_999n) / 10_000n;
+}
+
 export function supportsTimedMarketCreation(chainId: ChainId) {
   const support: Record<ChainId, string | undefined> = {
     zama: process.env.NEXT_PUBLIC_ZAMA_TIMED_MARKETS,

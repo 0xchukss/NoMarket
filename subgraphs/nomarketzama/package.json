@@ -6,7 +6,7 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "auth": "node -e \"console.log('Run: npx graph auth YOUR_DEPLOY_KEY')\"",
-    "deploy": "graph deploy nomarketzama --version-label 0.0.1"
+    "deploy": "graph deploy nomarketzama --version-label 0.0.2"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.98.1",

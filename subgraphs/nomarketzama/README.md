@@ -5,7 +5,7 @@ Indexes the Zama/Sepolia `NoMarket` contract at `0x9513bde114EA51A34B6d60D89B1De
 Deployed Studio endpoint:
 
 ```txt
-https://api.studio.thegraph.com/query/1754671/nomarketzama/0.0.1
+https://api.studio.thegraph.com/query/1754671/nomarketzama/0.0.2
 ```
 
 Useful commands:
@@ -29,7 +29,7 @@ npm run subgraph:zama:deploy
 Frontend env:
 
 ```env
-NEXT_PUBLIC_ZAMA_SUBGRAPH_URL=https://api.studio.thegraph.com/query/1754671/nomarketzama/0.0.1
+NEXT_PUBLIC_ZAMA_SUBGRAPH_URL=https://api.studio.thegraph.com/query/1754671/nomarketzama/0.0.2
 ```
 
 Indexed entities:

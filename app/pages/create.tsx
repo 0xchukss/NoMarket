@@ -510,10 +510,10 @@ export default function CreateMarketPage() {
             </section>
 
             <section className="oracle-panel oracle-create-stat">
-              <p className="oracle-kicker">Creation Deposit</p>
+              <p className="oracle-kicker">Creation Fee</p>
               <strong>{creationDepositWei.toString()}</strong>
               <span>{chain.nativeCurrency} wei</span>
-              <p>The deposit is enforced by timed deployments and refunded after clean resolution.</p>
+              <p>This fee is required when the market is confirmed on-chain.</p>
             </section>
           </aside>
         </form>

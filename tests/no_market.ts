@@ -7,6 +7,7 @@ import {
   expressionProbability,
   type Minterm
 } from "../app/lib/expression";
+import { getGrossBetValueFromStake } from "../app/lib/marketLifecycle";
 
 function matchingSlots(minterms: Minterm[], atomCount: number) {
   return Array.from({ length: 1 << atomCount }, (_, slot) => slot).filter((slot) =>
@@ -110,6 +111,18 @@ describe("NoMarket combinatorial market logic", () => {
     expect(matchingSlots(user1, 3)).to.include(outcomeVector);
     expect(matchingSlots(user2, 3)).to.not.include(outcomeVector);
     expect(matchingSlots(user3, 3)).to.include(outcomeVector);
+  });
+
+  it("fee accounting adds protocol fee on top of the signed stake", () => {
+    const previous = process.env.NEXT_PUBLIC_ARC_BET_FEE_BPS;
+    process.env.NEXT_PUBLIC_ARC_BET_FEE_BPS = "200";
+    try {
+      expect(getGrossBetValueFromStake(100n, "arc")).to.equal(102n);
+      expect(getGrossBetValueFromStake(1n, "arc")).to.equal(2n);
+    } finally {
+      if (previous === undefined) delete process.env.NEXT_PUBLIC_ARC_BET_FEE_BPS;
+      else process.env.NEXT_PUBLIC_ARC_BET_FEE_BPS = previous;
+    }
   });
 
   it("LMSR pricing sums to 1.0 and costs are positive", () => {

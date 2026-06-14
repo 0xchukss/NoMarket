@@ -224,6 +224,32 @@ export class Market extends Entity {
     this.set("totalStake", Value.fromBigInt(value));
   }
 
+  get totalFees(): BigInt {
+    let value = this.get("totalFees");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set totalFees(value: BigInt) {
+    this.set("totalFees", Value.fromBigInt(value));
+  }
+
+  get rewardPool(): BigInt {
+    let value = this.get("rewardPool");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set rewardPool(value: BigInt) {
+    this.set("rewardPool", Value.fromBigInt(value));
+  }
+
   get betCount(): BigInt {
     let value = this.get("betCount");
     if (!value || value.kind == ValueKind.NULL) {
@@ -235,6 +261,19 @@ export class Market extends Entity {
 
   set betCount(value: BigInt) {
     this.set("betCount", Value.fromBigInt(value));
+  }
+
+  get creatorFeesPaid(): boolean {
+    let value = this.get("creatorFeesPaid");
+    if (!value || value.kind == ValueKind.NULL) {
+      return false;
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set creatorFeesPaid(value: boolean) {
+    this.set("creatorFeesPaid", Value.fromBoolean(value));
   }
 
   get createdAtBlock(): BigInt {
@@ -406,6 +445,19 @@ export class Bet extends Entity {
     this.set("publicStake", Value.fromBigInt(value));
   }
 
+  get fee(): BigInt {
+    let value = this.get("fee");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set fee(value: BigInt) {
+    this.set("fee", Value.fromBigInt(value));
+  }
+
   get outcomeMask(): BigInt {
     let value = this.get("outcomeMask");
     if (!value || value.kind == ValueKind.NULL) {
@@ -445,6 +497,32 @@ export class Bet extends Entity {
     this.set("expression", Value.fromString(value));
   }
 
+  get claimed(): boolean {
+    let value = this.get("claimed");
+    if (!value || value.kind == ValueKind.NULL) {
+      return false;
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set claimed(value: boolean) {
+    this.set("claimed", Value.fromBoolean(value));
+  }
+
+  get payout(): BigInt {
+    let value = this.get("payout");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set payout(value: BigInt) {
+    this.set("payout", Value.fromBigInt(value));
+  }
+
   get transactionHash(): Bytes {
     let value = this.get("transactionHash");
     if (!value || value.kind == ValueKind.NULL) {
@@ -482,6 +560,141 @@ export class Bet extends Entity {
 
   set blockTimestamp(value: BigInt) {
     this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get minterms(): BetMintermLoader {
+    return new BetMintermLoader("Bet", this.get("id")!.toString(), "minterms");
+  }
+}
+
+export class BetMinterm extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save BetMinterm entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type BetMinterm must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("BetMinterm", id.toString(), this);
+    }
+  }
+
+  static loadInBlock(id: string): BetMinterm | null {
+    return changetype<BetMinterm | null>(store.get_in_block("BetMinterm", id));
+  }
+
+  static load(id: string): BetMinterm | null {
+    return changetype<BetMinterm | null>(store.get("BetMinterm", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get market(): string {
+    let value = this.get("market");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set market(value: string) {
+    this.set("market", Value.fromString(value));
+  }
+
+  get bet(): string {
+    let value = this.get("bet");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set bet(value: string) {
+    this.set("bet", Value.fromString(value));
+  }
+
+  get marketId(): BigInt {
+    let value = this.get("marketId");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set marketId(value: BigInt) {
+    this.set("marketId", Value.fromBigInt(value));
+  }
+
+  get betId(): BigInt {
+    let value = this.get("betId");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set betId(value: BigInt) {
+    this.set("betId", Value.fromBigInt(value));
+  }
+
+  get mintermIndex(): i32 {
+    let value = this.get("mintermIndex");
+    if (!value || value.kind == ValueKind.NULL) {
+      return 0;
+    } else {
+      return value.toI32();
+    }
+  }
+
+  set mintermIndex(value: i32) {
+    this.set("mintermIndex", Value.fromI32(value));
+  }
+
+  get outcomeMask(): BigInt {
+    let value = this.get("outcomeMask");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set outcomeMask(value: BigInt) {
+    this.set("outcomeMask", Value.fromBigInt(value));
+  }
+
+  get careMask(): BigInt {
+    let value = this.get("careMask");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set careMask(value: BigInt) {
+    this.set("careMask", Value.fromBigInt(value));
   }
 }
 
@@ -788,5 +1001,23 @@ export class ResolutionProposalLoader extends Entity {
   load(): ResolutionProposal[] {
     let value = store.loadRelated(this._entity, this._id, this._field);
     return changetype<ResolutionProposal[]>(value);
+  }
+}
+
+export class BetMintermLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): BetMinterm[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<BetMinterm[]>(value);
   }
 }

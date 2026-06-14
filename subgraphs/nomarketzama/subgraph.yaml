@@ -8,9 +8,9 @@ dataSources:
     name: NoMarket
     network: sepolia
     source:
-      address: "0x9513bde114EA51A34B6d60D89B1DebE06Ecf5F71"
+      address: "0x662BF453e5FC4387c5DCDCEFc06B4A1EBAdc5887"
       abi: NoMarket
-      startBlock: 10821029
+      startBlock: 11061586
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -26,10 +26,18 @@ dataSources:
       eventHandlers:
         - event: MarketCreated(indexed uint256,indexed address,string,string,uint16)
           handler: handleMarketCreated
+        - event: MarketLifecycleConfigured(indexed uint256,uint64,uint64,uint64,uint256)
+          handler: handleMarketLifecycleConfigured
+        - event: MarketCreationFeePaid(indexed uint256,indexed address,uint256)
+          handler: handleMarketCreationFeePaid
         - event: BetPlaced(indexed uint256,indexed uint256,indexed address,uint256,bytes32,bytes32,bytes32)
           handler: handleBetPlaced
+        - event: BetFeeCollected(indexed uint256,indexed uint256,uint256)
+          handler: handleBetFeeCollected
         - event: UmaResolutionProposed(indexed uint256,indexed bytes32,uint16,string)
           handler: handleUmaResolutionProposed
         - event: MarketResolved(indexed uint256,uint16)
           handler: handleMarketResolved
+        - event: CreatorFeesPaid(indexed uint256,indexed address,uint256)
+          handler: handleCreatorFeesPaid
       file: ./src/no-market.ts

@@ -315,7 +315,11 @@ const noMarket = await deployArtifact({
   artifactPath: artifacts.NoMarketArc,
   name: "NoMarketArc",
   description: "NoMarket Arc public beta prediction market",
-  constructorParameters: [resolver.address, optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "0"]
+  constructorParameters: [
+    resolver.address,
+    optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "5000000000000000000",
+    optionalEnv("ARC_BET_FEE_BPS") || "200"
+  ]
 });
 
 output.CIRCLE_ARC_UMA_OOV2_ADDRESS = ooV2.address;
@@ -325,7 +329,8 @@ output.CIRCLE_ARC_NOMARKET_CONTRACT_ID = noMarket.contractId;
 output.CIRCLE_ARC_NOMARKET_DEPLOY_TX_ID = noMarket.transactionId;
 output.CIRCLE_ARC_NOMARKET_ADDRESS = noMarket.contract.contractAddress;
 output.NEXT_PUBLIC_ARC_TIMED_MARKETS = "true";
-output.NEXT_PUBLIC_ARC_MARKET_CREATION_DEPOSIT_WEI = optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "0";
+output.NEXT_PUBLIC_ARC_MARKET_CREATION_DEPOSIT_WEI = optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "5000000000000000000";
+output.NEXT_PUBLIC_ARC_BET_FEE_BPS = optionalEnv("ARC_BET_FEE_BPS") || "200";
 
 output.ARC_UMA_TIMER_ADDRESS = timer.address;
 output.ARC_UMA_FINDER_ADDRESS = finder.address;

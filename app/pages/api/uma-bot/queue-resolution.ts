@@ -12,6 +12,7 @@ type BotResponse = {
   message: string;
   assertionTx?: string;
   settlementTx?: string;
+  claimTx?: string;
   outcomeVector?: number;
 };
 
@@ -113,6 +114,28 @@ function normalizeAssertionId(value: unknown): Hex | undefined {
 function getPublicUmaSettlementAddress(chainId: ChainId): Address | undefined {
   if (chainId === "arc") return arcUmaResolverAddress;
   return undefined;
+}
+
+async function fetchBetIdsForClaims(subgraphUrl: string | undefined, marketId: string) {
+  if (!subgraphUrl) return [] as bigint[];
+  const response = await fetch(subgraphUrl, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        query ClaimableBets($marketId: BigInt!) {
+          bets(where: { marketId: $marketId, claimed: false }, first: 1000, orderBy: betId, orderDirection: asc) {
+            betId
+          }
+        }
+      `,
+      variables: { marketId }
+    })
+  });
+  if (!response.ok) return [];
+  const payload = await response.json();
+  if (payload.errors?.length) return [];
+  return ((payload.data?.bets || []) as Array<{ betId: string }>).map((bet) => BigInt(bet.betId));
 }
 
 async function evaluateAtoms(market: BotMarket, networkName: string) {
@@ -255,10 +278,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
               chain: viemChain
             });
       await publicClient.waitForTransactionReceipt({ hash: settlementHash });
+      let claimTx: Hex | undefined;
+      if (chain.id === "arc") {
+        const betIds = await fetchBetIdsForClaims(chain.subgraphUrl, market.onchain.marketId);
+        if (betIds.length > 0) {
+          try {
+            claimTx = await walletClient.writeContract({
+              address,
+              abi: arcNoMarketAbi,
+              functionName: "claimBets",
+              args: [betIds],
+              account,
+              chain: viemChain
+            });
+            await publicClient.waitForTransactionReceipt({ hash: claimTx });
+          } catch {
+            claimTx = undefined;
+          }
+        }
+      }
       return res.status(200).json({
         status: "settled",
-        message: "Resolver bot settled the UMA assertion.",
-        settlementTx: settlementHash
+        message: claimTx
+          ? "Resolver bot settled the UMA assertion and pushed available Arc payouts."
+          : "Resolver bot settled the UMA assertion.",
+        settlementTx: settlementHash,
+        claimTx
       });
     } catch {
       return res.status(200).json({

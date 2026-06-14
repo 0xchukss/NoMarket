@@ -7,11 +7,25 @@ export const noMarketAbi = [
   {
     type: "function",
     name: "createMarket",
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     inputs: [
       { name: "title", type: "string" },
       { name: "question", type: "string" },
       { name: "atomCount", type: "uint16" }
+    ],
+    outputs: [{ name: "marketId", type: "uint256" }]
+  },
+  {
+    type: "function",
+    name: "createTimedMarket",
+    stateMutability: "payable",
+    inputs: [
+      { name: "title", type: "string" },
+      { name: "question", type: "string" },
+      { name: "atomCount", type: "uint16" },
+      { name: "tradingEndTime", type: "uint64" },
+      { name: "eventOccurrenceTime", type: "uint64" },
+      { name: "resolutionBufferSeconds", type: "uint64" }
     ],
     outputs: [{ name: "marketId", type: "uint256" }]
   },
@@ -61,8 +75,34 @@ export const noMarketAbi = [
       { name: "outcomeVector", type: "uint16" },
       { name: "totalStake", type: "uint256" },
       { name: "betCount", type: "uint256" },
-      { name: "umaAssertionId", type: "bytes32" }
+      { name: "umaAssertionId", type: "bytes32" },
+      { name: "tradingEndTime", type: "uint64" },
+      { name: "eventOccurrenceTime", type: "uint64" },
+      { name: "resolutionTime", type: "uint64" },
+      { name: "creationFeePaid", type: "uint256" },
+      { name: "totalFees", type: "uint256" },
+      { name: "creatorFeesPaid", type: "bool" }
     ]
+  },
+  {
+    type: "function",
+    name: "marketLifecycle",
+    stateMutability: "view",
+    inputs: [{ name: "marketId", type: "uint256" }],
+    outputs: [
+      { name: "tradingEndTime", type: "uint64" },
+      { name: "eventOccurrenceTime", type: "uint64" },
+      { name: "resolutionTime", type: "uint64" },
+      { name: "creationFeePaid", type: "uint256" },
+      { name: "creatorFeesPaid", type: "bool" }
+    ]
+  },
+  {
+    type: "function",
+    name: "claimCreatorFees",
+    stateMutability: "nonpayable",
+    inputs: [],
+    outputs: []
   },
   {
     type: "event",
@@ -78,6 +118,28 @@ export const noMarketAbi = [
   },
   {
     type: "event",
+    name: "MarketLifecycleConfigured",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: false, name: "tradingEndTime", type: "uint64" },
+      { indexed: false, name: "eventOccurrenceTime", type: "uint64" },
+      { indexed: false, name: "resolutionTime", type: "uint64" },
+      { indexed: false, name: "creationFeePaid", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
+    name: "MarketCreationFeePaid",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "creator", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" }
+    ]
+  },
+  {
+    type: "event",
     name: "BetPlaced",
     anonymous: false,
     inputs: [
@@ -88,6 +150,16 @@ export const noMarketAbi = [
       { indexed: false, name: "encryptedStakeHandle", type: "bytes32" },
       { indexed: false, name: "encryptedOutcomeMaskHandle", type: "bytes32" },
       { indexed: false, name: "encryptedCareMaskHandle", type: "bytes32" }
+    ]
+  },
+  {
+    type: "event",
+    name: "BetFeeCollected",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "betId", type: "uint256" },
+      { indexed: false, name: "fee", type: "uint256" }
     ]
   },
   {
@@ -108,6 +180,16 @@ export const noMarketAbi = [
     inputs: [
       { indexed: true, name: "marketId", type: "uint256" },
       { indexed: false, name: "outcomeVector", type: "uint16" }
+    ]
+  },
+  {
+    type: "event",
+    name: "CreatorFeesPaid",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketId", type: "uint256" },
+      { indexed: true, name: "creator", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" }
     ]
   }
 ] as const;

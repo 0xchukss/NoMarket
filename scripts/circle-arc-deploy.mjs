@@ -91,7 +91,11 @@ const noMarket = await deployArtifact({
   artifactPath: "contracts/arc/out/NoMarketArc.sol/NoMarketArc.json",
   name: "NoMarketArc",
   description: "NoMarket Arc public beta prediction market",
-  constructorParameters: [oracleAddress, optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "0"]
+  constructorParameters: [
+    oracleAddress,
+    optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "5000000000000000000",
+    optionalEnv("ARC_BET_FEE_BPS") || "200"
+  ]
 });
 
 output.CIRCLE_ARC_NOMARKET_CONTRACT_ID = noMarket.contractId;
@@ -100,7 +104,8 @@ output.CIRCLE_ARC_NOMARKET_ADDRESS = noMarket.contract.contractAddress;
 output.NEXT_PUBLIC_ARC_NOMARKET_ADDRESS = noMarket.contract.contractAddress;
 output.NEXT_PUBLIC_ARC_DEPLOY_BLOCK = noMarket.transaction?.blockHeight;
 output.NEXT_PUBLIC_ARC_TIMED_MARKETS = "true";
-output.NEXT_PUBLIC_ARC_MARKET_CREATION_DEPOSIT_WEI = optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "0";
+output.NEXT_PUBLIC_ARC_MARKET_CREATION_DEPOSIT_WEI = optionalEnv("ARC_MARKET_CREATION_DEPOSIT_WEI") || "5000000000000000000";
+output.NEXT_PUBLIC_ARC_BET_FEE_BPS = optionalEnv("ARC_BET_FEE_BPS") || "200";
 if (oracleAddress === optionalEnv("UMA_OOV3_ADDRESS_ARC")) {
   output.NEXT_PUBLIC_ARC_UMA_OOV3_ADDRESS = oracleAddress;
 }

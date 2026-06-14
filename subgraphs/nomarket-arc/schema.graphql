@@ -13,7 +13,10 @@ type Market @entity(immutable: false) {
   resolutionTime: BigInt!
   creatorDeposit: BigInt!
   totalStake: BigInt!
+  totalFees: BigInt!
+  rewardPool: BigInt!
   betCount: BigInt!
+  creatorFeesPaid: Boolean!
   createdAtBlock: BigInt!
   createdAtTimestamp: BigInt!
   transactionHash: Bytes!
@@ -29,12 +32,27 @@ type Bet @entity(immutable: true) {
   bettor: Bytes!
   stake: BigInt!
   publicStake: BigInt!
+  fee: BigInt!
   outcomeMask: BigInt!
   careMask: BigInt!
   expression: String!
+  claimed: Boolean!
+  payout: BigInt!
   transactionHash: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
+  minterms: [BetMinterm!]! @derivedFrom(field: "bet")
+}
+
+type BetMinterm @entity(immutable: true) {
+  id: ID!
+  market: Market!
+  bet: Bet!
+  marketId: BigInt!
+  betId: BigInt!
+  mintermIndex: Int!
+  outcomeMask: BigInt!
+  careMask: BigInt!
 }
 
 type ResolutionProposal @entity(immutable: true) {

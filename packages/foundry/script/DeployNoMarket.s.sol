@@ -12,9 +12,11 @@ contract DeployNoMarket is Script {
         uint64 liveness = uint64(vm.envOr("UMA_LIVENESS_SECONDS", uint256(7200)));
         bytes32 identifier = vm.envOr("UMA_ASSERTION_IDENTIFIER", bytes32(0));
         bytes32 domain = vm.envOr("UMA_DOMAIN", bytes32(0));
+        uint256 creationFee = vm.envOr("ZAMA_MARKET_CREATION_DEPOSIT_WEI", uint256(0.002 ether));
+        uint256 betFeeBps = vm.envOr("ZAMA_BET_FEE_BPS", uint256(200));
 
         vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
-        noMarket = new NoMarket(optimisticOracle, currency, bond, liveness, identifier, domain);
+        noMarket = new NoMarket(optimisticOracle, currency, bond, liveness, identifier, domain, creationFee, betFeeBps);
         vm.stopBroadcast();
     }
 }

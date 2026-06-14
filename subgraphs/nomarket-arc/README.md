@@ -5,7 +5,7 @@ Indexes the Arc Testnet `NoMarketArc` contract at `0x564a0c5827256a438b7719b7133
 Deployed Studio endpoint:
 
 ```txt
-https://api.studio.thegraph.com/query/1754671/nomarket-arc/0.0.1
+https://api.studio.thegraph.com/query/1754671/nomarket-arc/0.0.2
 ```
 
 Useful commands:
@@ -29,7 +29,7 @@ npm run subgraph:arc:deploy
 Frontend env:
 
 ```env
-NEXT_PUBLIC_ARC_SUBGRAPH_URL=https://api.studio.thegraph.com/query/1754671/nomarket-arc/0.0.1
+NEXT_PUBLIC_ARC_SUBGRAPH_URL=https://api.studio.thegraph.com/query/1754671/nomarket-arc/0.0.2
 ```
 
 Indexed entities:

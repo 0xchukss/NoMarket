@@ -10,16 +10,16 @@ import {
   BigInt,
 } from "@graphprotocol/graph-ts";
 
-export class MarketCreated extends ethereum.Event {
-  get params(): MarketCreated__Params {
-    return new MarketCreated__Params(this);
+export class BetClaimed extends ethereum.Event {
+  get params(): BetClaimed__Params {
+    return new BetClaimed__Params(this);
   }
 }
 
-export class MarketCreated__Params {
-  _event: MarketCreated;
+export class BetClaimed__Params {
+  _event: BetClaimed;
 
-  constructor(event: MarketCreated) {
+  constructor(event: BetClaimed) {
     this._event = event;
   }
 
@@ -27,71 +27,75 @@ export class MarketCreated__Params {
     return this._event.parameters[0].value.toBigInt();
   }
 
-  get creator(): Address {
-    return this._event.parameters[1].value.toAddress();
-  }
-
-  get title(): string {
-    return this._event.parameters[2].value.toString();
-  }
-
-  get atomCount(): i32 {
-    return this._event.parameters[3].value.toI32();
-  }
-}
-
-export class MarketMetadata extends ethereum.Event {
-  get params(): MarketMetadata__Params {
-    return new MarketMetadata__Params(this);
-  }
-}
-
-export class MarketMetadata__Params {
-  _event: MarketMetadata;
-
-  constructor(event: MarketMetadata) {
-    this._event = event;
-  }
-
-  get marketId(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
-  }
-
-  get metadata(): string {
-    return this._event.parameters[1].value.toString();
-  }
-}
-
-export class MarketLifecycleConfigured extends ethereum.Event {
-  get params(): MarketLifecycleConfigured__Params {
-    return new MarketLifecycleConfigured__Params(this);
-  }
-}
-
-export class MarketLifecycleConfigured__Params {
-  _event: MarketLifecycleConfigured;
-
-  constructor(event: MarketLifecycleConfigured) {
-    this._event = event;
-  }
-
-  get marketId(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
-  }
-
-  get tradingEndTime(): BigInt {
+  get betId(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get eventOccurrenceTime(): BigInt {
-    return this._event.parameters[2].value.toBigInt();
+  get bettor(): Address {
+    return this._event.parameters[2].value.toAddress();
   }
 
-  get resolutionTime(): BigInt {
+  get payout(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+}
+
+export class BetFeeCollected extends ethereum.Event {
+  get params(): BetFeeCollected__Params {
+    return new BetFeeCollected__Params(this);
+  }
+}
+
+export class BetFeeCollected__Params {
+  _event: BetFeeCollected;
+
+  constructor(event: BetFeeCollected) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get betId(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get fee(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class BetMinterm extends ethereum.Event {
+  get params(): BetMinterm__Params {
+    return new BetMinterm__Params(this);
+  }
+}
+
+export class BetMinterm__Params {
+  _event: BetMinterm;
+
+  constructor(event: BetMinterm) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get betId(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get mintermIndex(): i32 {
+    return this._event.parameters[2].value.toI32();
+  }
+
+  get outcomeMask(): BigInt {
     return this._event.parameters[3].value.toBigInt();
   }
 
-  get creatorDeposit(): BigInt {
+  get careMask(): BigInt {
     return this._event.parameters[4].value.toBigInt();
   }
 }
@@ -138,6 +142,262 @@ export class BetPlaced__Params {
   }
 }
 
+export class CreatorFeesClaimable extends ethereum.Event {
+  get params(): CreatorFeesClaimable__Params {
+    return new CreatorFeesClaimable__Params(this);
+  }
+}
+
+export class CreatorFeesClaimable__Params {
+  _event: CreatorFeesClaimable;
+
+  constructor(event: CreatorFeesClaimable) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get creator(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class CreatorFeesPaid extends ethereum.Event {
+  get params(): CreatorFeesPaid__Params {
+    return new CreatorFeesPaid__Params(this);
+  }
+}
+
+export class CreatorFeesPaid__Params {
+  _event: CreatorFeesPaid;
+
+  constructor(event: CreatorFeesPaid) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get creator(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class MarketCreated extends ethereum.Event {
+  get params(): MarketCreated__Params {
+    return new MarketCreated__Params(this);
+  }
+}
+
+export class MarketCreated__Params {
+  _event: MarketCreated;
+
+  constructor(event: MarketCreated) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get creator(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get title(): string {
+    return this._event.parameters[2].value.toString();
+  }
+
+  get atomCount(): i32 {
+    return this._event.parameters[3].value.toI32();
+  }
+}
+
+export class MarketCreationFeePaid extends ethereum.Event {
+  get params(): MarketCreationFeePaid__Params {
+    return new MarketCreationFeePaid__Params(this);
+  }
+}
+
+export class MarketCreationFeePaid__Params {
+  _event: MarketCreationFeePaid;
+
+  constructor(event: MarketCreationFeePaid) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get creator(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class MarketLifecycleConfigured extends ethereum.Event {
+  get params(): MarketLifecycleConfigured__Params {
+    return new MarketLifecycleConfigured__Params(this);
+  }
+}
+
+export class MarketLifecycleConfigured__Params {
+  _event: MarketLifecycleConfigured;
+
+  constructor(event: MarketLifecycleConfigured) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get tradingEndTime(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get eventOccurrenceTime(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get resolutionTime(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+
+  get creationFeePaid(): BigInt {
+    return this._event.parameters[4].value.toBigInt();
+  }
+}
+
+export class MarketMetadata extends ethereum.Event {
+  get params(): MarketMetadata__Params {
+    return new MarketMetadata__Params(this);
+  }
+}
+
+export class MarketMetadata__Params {
+  _event: MarketMetadata;
+
+  constructor(event: MarketMetadata) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get metadata(): string {
+    return this._event.parameters[1].value.toString();
+  }
+}
+
+export class MarketResolved extends ethereum.Event {
+  get params(): MarketResolved__Params {
+    return new MarketResolved__Params(this);
+  }
+}
+
+export class MarketResolved__Params {
+  _event: MarketResolved;
+
+  constructor(event: MarketResolved) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get outcomeVector(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class MarketRewardFunded extends ethereum.Event {
+  get params(): MarketRewardFunded__Params {
+    return new MarketRewardFunded__Params(this);
+  }
+}
+
+export class MarketRewardFunded__Params {
+  _event: MarketRewardFunded;
+
+  constructor(event: MarketRewardFunded) {
+    this._event = event;
+  }
+
+  get marketId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get funder(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class PendingPayoutClaimed extends ethereum.Event {
+  get params(): PendingPayoutClaimed__Params {
+    return new PendingPayoutClaimed__Params(this);
+  }
+}
+
+export class PendingPayoutClaimed__Params {
+  _event: PendingPayoutClaimed;
+
+  constructor(event: PendingPayoutClaimed) {
+    this._event = event;
+  }
+
+  get account(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class TreasuryFeesWithdrawn extends ethereum.Event {
+  get params(): TreasuryFeesWithdrawn__Params {
+    return new TreasuryFeesWithdrawn__Params(this);
+  }
+}
+
+export class TreasuryFeesWithdrawn__Params {
+  _event: TreasuryFeesWithdrawn;
+
+  constructor(event: TreasuryFeesWithdrawn) {
+    this._event = event;
+  }
+
+  get recipient(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
 export class UmaResolutionProposed extends ethereum.Event {
   get params(): UmaResolutionProposed__Params {
     return new UmaResolutionProposed__Params(this);
@@ -168,30 +428,1360 @@ export class UmaResolutionProposed__Params {
   }
 }
 
-export class MarketResolved extends ethereum.Event {
-  get params(): MarketResolved__Params {
-    return new MarketResolved__Params(this);
+export class NoMarketArc__betMintermsResult {
+  value0: Array<BigInt>;
+  value1: Array<BigInt>;
+
+  constructor(value0: Array<BigInt>, value1: Array<BigInt>) {
+    this.value0 = value0;
+    this.value1 = value1;
+  }
+
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromUnsignedBigIntArray(this.value0));
+    map.set("value1", ethereum.Value.fromUnsignedBigIntArray(this.value1));
+    return map;
+  }
+
+  getOutcomeMasks(): Array<BigInt> {
+    return this.value0;
+  }
+
+  getCareMasks(): Array<BigInt> {
+    return this.value1;
   }
 }
 
-export class MarketResolved__Params {
-  _event: MarketResolved;
+export class NoMarketArc__betsResult {
+  value0: Address;
+  value1: BigInt;
+  value2: BigInt;
+  value3: BigInt;
+  value4: BigInt;
+  value5: BigInt;
+  value6: string;
+  value7: boolean;
 
-  constructor(event: MarketResolved) {
-    this._event = event;
+  constructor(
+    value0: Address,
+    value1: BigInt,
+    value2: BigInt,
+    value3: BigInt,
+    value4: BigInt,
+    value5: BigInt,
+    value6: string,
+    value7: boolean,
+  ) {
+    this.value0 = value0;
+    this.value1 = value1;
+    this.value2 = value2;
+    this.value3 = value3;
+    this.value4 = value4;
+    this.value5 = value5;
+    this.value6 = value6;
+    this.value7 = value7;
   }
 
-  get marketId(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromAddress(this.value0));
+    map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
+    map.set("value2", ethereum.Value.fromUnsignedBigInt(this.value2));
+    map.set("value3", ethereum.Value.fromUnsignedBigInt(this.value3));
+    map.set("value4", ethereum.Value.fromUnsignedBigInt(this.value4));
+    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
+    map.set("value6", ethereum.Value.fromString(this.value6));
+    map.set("value7", ethereum.Value.fromBoolean(this.value7));
+    return map;
   }
 
-  get outcomeVector(): BigInt {
-    return this._event.parameters[1].value.toBigInt();
+  getBettor(): Address {
+    return this.value0;
+  }
+
+  getMarketId(): BigInt {
+    return this.value1;
+  }
+
+  getStake(): BigInt {
+    return this.value2;
+  }
+
+  getFee(): BigInt {
+    return this.value3;
+  }
+
+  getOutcomeMask(): BigInt {
+    return this.value4;
+  }
+
+  getCareMask(): BigInt {
+    return this.value5;
+  }
+
+  getExpression(): string {
+    return this.value6;
+  }
+
+  getClaimed(): boolean {
+    return this.value7;
+  }
+}
+
+export class NoMarketArc__marketLifecycleResult {
+  value0: BigInt;
+  value1: BigInt;
+  value2: BigInt;
+  value3: BigInt;
+  value4: boolean;
+
+  constructor(
+    value0: BigInt,
+    value1: BigInt,
+    value2: BigInt,
+    value3: BigInt,
+    value4: boolean,
+  ) {
+    this.value0 = value0;
+    this.value1 = value1;
+    this.value2 = value2;
+    this.value3 = value3;
+    this.value4 = value4;
+  }
+
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
+    map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
+    map.set("value2", ethereum.Value.fromUnsignedBigInt(this.value2));
+    map.set("value3", ethereum.Value.fromUnsignedBigInt(this.value3));
+    map.set("value4", ethereum.Value.fromBoolean(this.value4));
+    return map;
+  }
+
+  getTradingEndTime(): BigInt {
+    return this.value0;
+  }
+
+  getEventOccurrenceTime(): BigInt {
+    return this.value1;
+  }
+
+  getResolutionTime(): BigInt {
+    return this.value2;
+  }
+
+  getCreatorDeposit(): BigInt {
+    return this.value3;
+  }
+
+  getDepositClaimed(): boolean {
+    return this.value4;
+  }
+}
+
+export class NoMarketArc__marketsResult {
+  value0: Address;
+  value1: string;
+  value2: string;
+  value3: i32;
+  value4: boolean;
+  value5: BigInt;
+  value6: Bytes;
+  value7: BigInt;
+  value8: BigInt;
+  value9: BigInt;
+  value10: BigInt;
+  value11: BigInt;
+  value12: BigInt;
+  value13: BigInt;
+  value14: boolean;
+
+  constructor(
+    value0: Address,
+    value1: string,
+    value2: string,
+    value3: i32,
+    value4: boolean,
+    value5: BigInt,
+    value6: Bytes,
+    value7: BigInt,
+    value8: BigInt,
+    value9: BigInt,
+    value10: BigInt,
+    value11: BigInt,
+    value12: BigInt,
+    value13: BigInt,
+    value14: boolean,
+  ) {
+    this.value0 = value0;
+    this.value1 = value1;
+    this.value2 = value2;
+    this.value3 = value3;
+    this.value4 = value4;
+    this.value5 = value5;
+    this.value6 = value6;
+    this.value7 = value7;
+    this.value8 = value8;
+    this.value9 = value9;
+    this.value10 = value10;
+    this.value11 = value11;
+    this.value12 = value12;
+    this.value13 = value13;
+    this.value14 = value14;
+  }
+
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromAddress(this.value0));
+    map.set("value1", ethereum.Value.fromString(this.value1));
+    map.set("value2", ethereum.Value.fromString(this.value2));
+    map.set(
+      "value3",
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(this.value3)),
+    );
+    map.set("value4", ethereum.Value.fromBoolean(this.value4));
+    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
+    map.set("value6", ethereum.Value.fromFixedBytes(this.value6));
+    map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
+    map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
+    map.set("value9", ethereum.Value.fromUnsignedBigInt(this.value9));
+    map.set("value10", ethereum.Value.fromUnsignedBigInt(this.value10));
+    map.set("value11", ethereum.Value.fromUnsignedBigInt(this.value11));
+    map.set("value12", ethereum.Value.fromUnsignedBigInt(this.value12));
+    map.set("value13", ethereum.Value.fromUnsignedBigInt(this.value13));
+    map.set("value14", ethereum.Value.fromBoolean(this.value14));
+    return map;
+  }
+
+  getCreator(): Address {
+    return this.value0;
+  }
+
+  getTitle(): string {
+    return this.value1;
+  }
+
+  getMetadata(): string {
+    return this.value2;
+  }
+
+  getAtomCount(): i32 {
+    return this.value3;
+  }
+
+  getResolved(): boolean {
+    return this.value4;
+  }
+
+  getOutcomeVector(): BigInt {
+    return this.value5;
+  }
+
+  getAssertionId(): Bytes {
+    return this.value6;
+  }
+
+  getTradingEndTime(): BigInt {
+    return this.value7;
+  }
+
+  getEventOccurrenceTime(): BigInt {
+    return this.value8;
+  }
+
+  getResolutionTime(): BigInt {
+    return this.value9;
+  }
+
+  getCreationFeePaid(): BigInt {
+    return this.value10;
+  }
+
+  getTotalStake(): BigInt {
+    return this.value11;
+  }
+
+  getTotalFees(): BigInt {
+    return this.value12;
+  }
+
+  getRewardPool(): BigInt {
+    return this.value13;
+  }
+
+  getCreatorFeesPaid(): boolean {
+    return this.value14;
   }
 }
 
 export class NoMarketArc extends ethereum.SmartContract {
   static bind(address: Address): NoMarketArc {
     return new NoMarketArc("NoMarketArc", address);
+  }
+
+  BPS_DENOMINATOR(): BigInt {
+    let result = super.call(
+      "BPS_DENOMINATOR",
+      "BPS_DENOMINATOR():(uint256)",
+      [],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_BPS_DENOMINATOR(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "BPS_DENOMINATOR",
+      "BPS_DENOMINATOR():(uint256)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  CREATOR_FEE_SHARE_BPS(): BigInt {
+    let result = super.call(
+      "CREATOR_FEE_SHARE_BPS",
+      "CREATOR_FEE_SHARE_BPS():(uint256)",
+      [],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_CREATOR_FEE_SHARE_BPS(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "CREATOR_FEE_SHARE_BPS",
+      "CREATOR_FEE_SHARE_BPS():(uint256)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  MAX_MATCHED_OUTCOMES(): BigInt {
+    let result = super.call(
+      "MAX_MATCHED_OUTCOMES",
+      "MAX_MATCHED_OUTCOMES():(uint256)",
+      [],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_MAX_MATCHED_OUTCOMES(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "MAX_MATCHED_OUTCOMES",
+      "MAX_MATCHED_OUTCOMES():(uint256)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  assertionIdToMarketId(param0: Bytes): BigInt {
+    let result = super.call(
+      "assertionIdToMarketId",
+      "assertionIdToMarketId(bytes32):(uint256)",
+      [ethereum.Value.fromFixedBytes(param0)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_assertionIdToMarketId(param0: Bytes): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "assertionIdToMarketId",
+      "assertionIdToMarketId(bytes32):(uint256)",
+      [ethereum.Value.fromFixedBytes(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  betFeeBps(): BigInt {
+    let result = super.call("betFeeBps", "betFeeBps():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_betFeeBps(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("betFeeBps", "betFeeBps():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  betMinterms(betId: BigInt): NoMarketArc__betMintermsResult {
+    let result = super.call(
+      "betMinterms",
+      "betMinterms(uint256):(uint256[],uint256[])",
+      [ethereum.Value.fromUnsignedBigInt(betId)],
+    );
+
+    return new NoMarketArc__betMintermsResult(
+      result[0].toBigIntArray(),
+      result[1].toBigIntArray(),
+    );
+  }
+
+  try_betMinterms(
+    betId: BigInt,
+  ): ethereum.CallResult<NoMarketArc__betMintermsResult> {
+    let result = super.tryCall(
+      "betMinterms",
+      "betMinterms(uint256):(uint256[],uint256[])",
+      [ethereum.Value.fromUnsignedBigInt(betId)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      new NoMarketArc__betMintermsResult(
+        value[0].toBigIntArray(),
+        value[1].toBigIntArray(),
+      ),
+    );
+  }
+
+  bets(param0: BigInt): NoMarketArc__betsResult {
+    let result = super.call(
+      "bets",
+      "bets(uint256):(address,uint256,uint256,uint256,uint256,uint256,string,bool)",
+      [ethereum.Value.fromUnsignedBigInt(param0)],
+    );
+
+    return new NoMarketArc__betsResult(
+      result[0].toAddress(),
+      result[1].toBigInt(),
+      result[2].toBigInt(),
+      result[3].toBigInt(),
+      result[4].toBigInt(),
+      result[5].toBigInt(),
+      result[6].toString(),
+      result[7].toBoolean(),
+    );
+  }
+
+  try_bets(param0: BigInt): ethereum.CallResult<NoMarketArc__betsResult> {
+    let result = super.tryCall(
+      "bets",
+      "bets(uint256):(address,uint256,uint256,uint256,uint256,uint256,string,bool)",
+      [ethereum.Value.fromUnsignedBigInt(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      new NoMarketArc__betsResult(
+        value[0].toAddress(),
+        value[1].toBigInt(),
+        value[2].toBigInt(),
+        value[3].toBigInt(),
+        value[4].toBigInt(),
+        value[5].toBigInt(),
+        value[6].toString(),
+        value[7].toBoolean(),
+      ),
+    );
+  }
+
+  claimBet(betId: BigInt): BigInt {
+    let result = super.call("claimBet", "claimBet(uint256):(uint256)", [
+      ethereum.Value.fromUnsignedBigInt(betId),
+    ]);
+
+    return result[0].toBigInt();
+  }
+
+  try_claimBet(betId: BigInt): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("claimBet", "claimBet(uint256):(uint256)", [
+      ethereum.Value.fromUnsignedBigInt(betId),
+    ]);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  claimBets(betIds: Array<BigInt>): BigInt {
+    let result = super.call("claimBets", "claimBets(uint256[]):(uint256)", [
+      ethereum.Value.fromUnsignedBigIntArray(betIds),
+    ]);
+
+    return result[0].toBigInt();
+  }
+
+  try_claimBets(betIds: Array<BigInt>): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("claimBets", "claimBets(uint256[]):(uint256)", [
+      ethereum.Value.fromUnsignedBigIntArray(betIds),
+    ]);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  claimablePayout(betId: BigInt): BigInt {
+    let result = super.call(
+      "claimablePayout",
+      "claimablePayout(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(betId)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_claimablePayout(betId: BigInt): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "claimablePayout",
+      "claimablePayout(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(betId)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  creationFee(): BigInt {
+    let result = super.call("creationFee", "creationFee():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_creationFee(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("creationFee", "creationFee():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  isWinningBet(betId: BigInt): boolean {
+    let result = super.call("isWinningBet", "isWinningBet(uint256):(bool)", [
+      ethereum.Value.fromUnsignedBigInt(betId),
+    ]);
+
+    return result[0].toBoolean();
+  }
+
+  try_isWinningBet(betId: BigInt): ethereum.CallResult<boolean> {
+    let result = super.tryCall("isWinningBet", "isWinningBet(uint256):(bool)", [
+      ethereum.Value.fromUnsignedBigInt(betId),
+    ]);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
+  marketLifecycle(marketId: BigInt): NoMarketArc__marketLifecycleResult {
+    let result = super.call(
+      "marketLifecycle",
+      "marketLifecycle(uint256):(uint64,uint64,uint64,uint256,bool)",
+      [ethereum.Value.fromUnsignedBigInt(marketId)],
+    );
+
+    return new NoMarketArc__marketLifecycleResult(
+      result[0].toBigInt(),
+      result[1].toBigInt(),
+      result[2].toBigInt(),
+      result[3].toBigInt(),
+      result[4].toBoolean(),
+    );
+  }
+
+  try_marketLifecycle(
+    marketId: BigInt,
+  ): ethereum.CallResult<NoMarketArc__marketLifecycleResult> {
+    let result = super.tryCall(
+      "marketLifecycle",
+      "marketLifecycle(uint256):(uint64,uint64,uint64,uint256,bool)",
+      [ethereum.Value.fromUnsignedBigInt(marketId)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      new NoMarketArc__marketLifecycleResult(
+        value[0].toBigInt(),
+        value[1].toBigInt(),
+        value[2].toBigInt(),
+        value[3].toBigInt(),
+        value[4].toBoolean(),
+      ),
+    );
+  }
+
+  markets(param0: BigInt): NoMarketArc__marketsResult {
+    let result = super.call(
+      "markets",
+      "markets(uint256):(address,string,string,uint8,bool,uint256,bytes32,uint64,uint64,uint64,uint256,uint256,uint256,uint256,bool)",
+      [ethereum.Value.fromUnsignedBigInt(param0)],
+    );
+
+    return new NoMarketArc__marketsResult(
+      result[0].toAddress(),
+      result[1].toString(),
+      result[2].toString(),
+      result[3].toI32(),
+      result[4].toBoolean(),
+      result[5].toBigInt(),
+      result[6].toBytes(),
+      result[7].toBigInt(),
+      result[8].toBigInt(),
+      result[9].toBigInt(),
+      result[10].toBigInt(),
+      result[11].toBigInt(),
+      result[12].toBigInt(),
+      result[13].toBigInt(),
+      result[14].toBoolean(),
+    );
+  }
+
+  try_markets(param0: BigInt): ethereum.CallResult<NoMarketArc__marketsResult> {
+    let result = super.tryCall(
+      "markets",
+      "markets(uint256):(address,string,string,uint8,bool,uint256,bytes32,uint64,uint64,uint64,uint256,uint256,uint256,uint256,bool)",
+      [ethereum.Value.fromUnsignedBigInt(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      new NoMarketArc__marketsResult(
+        value[0].toAddress(),
+        value[1].toString(),
+        value[2].toString(),
+        value[3].toI32(),
+        value[4].toBoolean(),
+        value[5].toBigInt(),
+        value[6].toBytes(),
+        value[7].toBigInt(),
+        value[8].toBigInt(),
+        value[9].toBigInt(),
+        value[10].toBigInt(),
+        value[11].toBigInt(),
+        value[12].toBigInt(),
+        value[13].toBigInt(),
+        value[14].toBoolean(),
+      ),
+    );
+  }
+
+  nextBetId(): BigInt {
+    let result = super.call("nextBetId", "nextBetId():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_nextBetId(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("nextBetId", "nextBetId():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  nextMarketId(): BigInt {
+    let result = super.call("nextMarketId", "nextMarketId():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_nextMarketId(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("nextMarketId", "nextMarketId():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  optimisticOracle(): Address {
+    let result = super.call(
+      "optimisticOracle",
+      "optimisticOracle():(address)",
+      [],
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_optimisticOracle(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "optimisticOracle",
+      "optimisticOracle():(address)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  pendingCreatorFees(param0: Address): BigInt {
+    let result = super.call(
+      "pendingCreatorFees",
+      "pendingCreatorFees(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_pendingCreatorFees(param0: Address): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "pendingCreatorFees",
+      "pendingCreatorFees(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  pendingPayouts(param0: Address): BigInt {
+    let result = super.call(
+      "pendingPayouts",
+      "pendingPayouts(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_pendingPayouts(param0: Address): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "pendingPayouts",
+      "pendingPayouts(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  proposeResolution(
+    marketId: BigInt,
+    outcomeVector: BigInt,
+    claim: string,
+  ): Bytes {
+    let result = super.call(
+      "proposeResolution",
+      "proposeResolution(uint256,uint256,string):(bytes32)",
+      [
+        ethereum.Value.fromUnsignedBigInt(marketId),
+        ethereum.Value.fromUnsignedBigInt(outcomeVector),
+        ethereum.Value.fromString(claim),
+      ],
+    );
+
+    return result[0].toBytes();
+  }
+
+  try_proposeResolution(
+    marketId: BigInt,
+    outcomeVector: BigInt,
+    claim: string,
+  ): ethereum.CallResult<Bytes> {
+    let result = super.tryCall(
+      "proposeResolution",
+      "proposeResolution(uint256,uint256,string):(bytes32)",
+      [
+        ethereum.Value.fromUnsignedBigInt(marketId),
+        ethereum.Value.fromUnsignedBigInt(outcomeVector),
+        ethereum.Value.fromString(claim),
+      ],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
+  treasury(): Address {
+    let result = super.call("treasury", "treasury():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_treasury(): ethereum.CallResult<Address> {
+    let result = super.tryCall("treasury", "treasury():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  treasuryFeeBalance(): BigInt {
+    let result = super.call(
+      "treasuryFeeBalance",
+      "treasuryFeeBalance():(uint256)",
+      [],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_treasuryFeeBalance(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "treasuryFeeBalance",
+      "treasuryFeeBalance():(uint256)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  winningStakeByOutcome(param0: BigInt, param1: BigInt): BigInt {
+    let result = super.call(
+      "winningStakeByOutcome",
+      "winningStakeByOutcome(uint256,uint256):(uint256)",
+      [
+        ethereum.Value.fromUnsignedBigInt(param0),
+        ethereum.Value.fromUnsignedBigInt(param1),
+      ],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_winningStakeByOutcome(
+    param0: BigInt,
+    param1: BigInt,
+  ): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "winningStakeByOutcome",
+      "winningStakeByOutcome(uint256,uint256):(uint256)",
+      [
+        ethereum.Value.fromUnsignedBigInt(param0),
+        ethereum.Value.fromUnsignedBigInt(param1),
+      ],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+}
+
+export class ConstructorCall extends ethereum.Call {
+  get inputs(): ConstructorCall__Inputs {
+    return new ConstructorCall__Inputs(this);
+  }
+
+  get outputs(): ConstructorCall__Outputs {
+    return new ConstructorCall__Outputs(this);
+  }
+}
+
+export class ConstructorCall__Inputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+
+  get optimisticOracle_(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get creationFee_(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+
+  get betFeeBps_(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class ConstructorCall__Outputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+}
+
+export class AssertionResolvedCallbackCall extends ethereum.Call {
+  get inputs(): AssertionResolvedCallbackCall__Inputs {
+    return new AssertionResolvedCallbackCall__Inputs(this);
+  }
+
+  get outputs(): AssertionResolvedCallbackCall__Outputs {
+    return new AssertionResolvedCallbackCall__Outputs(this);
+  }
+}
+
+export class AssertionResolvedCallbackCall__Inputs {
+  _call: AssertionResolvedCallbackCall;
+
+  constructor(call: AssertionResolvedCallbackCall) {
+    this._call = call;
+  }
+
+  get assertionId(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get assertedTruthfully(): boolean {
+    return this._call.inputValues[1].value.toBoolean();
+  }
+}
+
+export class AssertionResolvedCallbackCall__Outputs {
+  _call: AssertionResolvedCallbackCall;
+
+  constructor(call: AssertionResolvedCallbackCall) {
+    this._call = call;
+  }
+}
+
+export class ClaimBetCall extends ethereum.Call {
+  get inputs(): ClaimBetCall__Inputs {
+    return new ClaimBetCall__Inputs(this);
+  }
+
+  get outputs(): ClaimBetCall__Outputs {
+    return new ClaimBetCall__Outputs(this);
+  }
+}
+
+export class ClaimBetCall__Inputs {
+  _call: ClaimBetCall;
+
+  constructor(call: ClaimBetCall) {
+    this._call = call;
+  }
+
+  get betId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class ClaimBetCall__Outputs {
+  _call: ClaimBetCall;
+
+  constructor(call: ClaimBetCall) {
+    this._call = call;
+  }
+
+  get payout(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class ClaimBetsCall extends ethereum.Call {
+  get inputs(): ClaimBetsCall__Inputs {
+    return new ClaimBetsCall__Inputs(this);
+  }
+
+  get outputs(): ClaimBetsCall__Outputs {
+    return new ClaimBetsCall__Outputs(this);
+  }
+}
+
+export class ClaimBetsCall__Inputs {
+  _call: ClaimBetsCall;
+
+  constructor(call: ClaimBetsCall) {
+    this._call = call;
+  }
+
+  get betIds(): Array<BigInt> {
+    return this._call.inputValues[0].value.toBigIntArray();
+  }
+}
+
+export class ClaimBetsCall__Outputs {
+  _call: ClaimBetsCall;
+
+  constructor(call: ClaimBetsCall) {
+    this._call = call;
+  }
+
+  get claimedCount(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class ClaimCreatorFeesCall extends ethereum.Call {
+  get inputs(): ClaimCreatorFeesCall__Inputs {
+    return new ClaimCreatorFeesCall__Inputs(this);
+  }
+
+  get outputs(): ClaimCreatorFeesCall__Outputs {
+    return new ClaimCreatorFeesCall__Outputs(this);
+  }
+}
+
+export class ClaimCreatorFeesCall__Inputs {
+  _call: ClaimCreatorFeesCall;
+
+  constructor(call: ClaimCreatorFeesCall) {
+    this._call = call;
+  }
+}
+
+export class ClaimCreatorFeesCall__Outputs {
+  _call: ClaimCreatorFeesCall;
+
+  constructor(call: ClaimCreatorFeesCall) {
+    this._call = call;
+  }
+}
+
+export class ClaimPendingPayoutCall extends ethereum.Call {
+  get inputs(): ClaimPendingPayoutCall__Inputs {
+    return new ClaimPendingPayoutCall__Inputs(this);
+  }
+
+  get outputs(): ClaimPendingPayoutCall__Outputs {
+    return new ClaimPendingPayoutCall__Outputs(this);
+  }
+}
+
+export class ClaimPendingPayoutCall__Inputs {
+  _call: ClaimPendingPayoutCall;
+
+  constructor(call: ClaimPendingPayoutCall) {
+    this._call = call;
+  }
+}
+
+export class ClaimPendingPayoutCall__Outputs {
+  _call: ClaimPendingPayoutCall;
+
+  constructor(call: ClaimPendingPayoutCall) {
+    this._call = call;
+  }
+}
+
+export class CreateMarketCall extends ethereum.Call {
+  get inputs(): CreateMarketCall__Inputs {
+    return new CreateMarketCall__Inputs(this);
+  }
+
+  get outputs(): CreateMarketCall__Outputs {
+    return new CreateMarketCall__Outputs(this);
+  }
+}
+
+export class CreateMarketCall__Inputs {
+  _call: CreateMarketCall;
+
+  constructor(call: CreateMarketCall) {
+    this._call = call;
+  }
+
+  get title(): string {
+    return this._call.inputValues[0].value.toString();
+  }
+
+  get metadata(): string {
+    return this._call.inputValues[1].value.toString();
+  }
+
+  get atomCount(): i32 {
+    return this._call.inputValues[2].value.toI32();
+  }
+}
+
+export class CreateMarketCall__Outputs {
+  _call: CreateMarketCall;
+
+  constructor(call: CreateMarketCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class CreateTimedMarketCall extends ethereum.Call {
+  get inputs(): CreateTimedMarketCall__Inputs {
+    return new CreateTimedMarketCall__Inputs(this);
+  }
+
+  get outputs(): CreateTimedMarketCall__Outputs {
+    return new CreateTimedMarketCall__Outputs(this);
+  }
+}
+
+export class CreateTimedMarketCall__Inputs {
+  _call: CreateTimedMarketCall;
+
+  constructor(call: CreateTimedMarketCall) {
+    this._call = call;
+  }
+
+  get title(): string {
+    return this._call.inputValues[0].value.toString();
+  }
+
+  get metadata(): string {
+    return this._call.inputValues[1].value.toString();
+  }
+
+  get atomCount(): i32 {
+    return this._call.inputValues[2].value.toI32();
+  }
+
+  get tradingEndTime(): BigInt {
+    return this._call.inputValues[3].value.toBigInt();
+  }
+
+  get eventOccurrenceTime(): BigInt {
+    return this._call.inputValues[4].value.toBigInt();
+  }
+
+  get resolutionBufferSeconds(): BigInt {
+    return this._call.inputValues[5].value.toBigInt();
+  }
+}
+
+export class CreateTimedMarketCall__Outputs {
+  _call: CreateTimedMarketCall;
+
+  constructor(call: CreateTimedMarketCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class FundMarketRewardsCall extends ethereum.Call {
+  get inputs(): FundMarketRewardsCall__Inputs {
+    return new FundMarketRewardsCall__Inputs(this);
+  }
+
+  get outputs(): FundMarketRewardsCall__Outputs {
+    return new FundMarketRewardsCall__Outputs(this);
+  }
+}
+
+export class FundMarketRewardsCall__Inputs {
+  _call: FundMarketRewardsCall;
+
+  constructor(call: FundMarketRewardsCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class FundMarketRewardsCall__Outputs {
+  _call: FundMarketRewardsCall;
+
+  constructor(call: FundMarketRewardsCall) {
+    this._call = call;
+  }
+}
+
+export class PlaceBetCall extends ethereum.Call {
+  get inputs(): PlaceBetCall__Inputs {
+    return new PlaceBetCall__Inputs(this);
+  }
+
+  get outputs(): PlaceBetCall__Outputs {
+    return new PlaceBetCall__Outputs(this);
+  }
+}
+
+export class PlaceBetCall__Inputs {
+  _call: PlaceBetCall;
+
+  constructor(call: PlaceBetCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get outcomeMask(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+
+  get careMask(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+
+  get expression(): string {
+    return this._call.inputValues[3].value.toString();
+  }
+}
+
+export class PlaceBetCall__Outputs {
+  _call: PlaceBetCall;
+
+  constructor(call: PlaceBetCall) {
+    this._call = call;
+  }
+
+  get betId(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class PlaceBetMintermsCall extends ethereum.Call {
+  get inputs(): PlaceBetMintermsCall__Inputs {
+    return new PlaceBetMintermsCall__Inputs(this);
+  }
+
+  get outputs(): PlaceBetMintermsCall__Outputs {
+    return new PlaceBetMintermsCall__Outputs(this);
+  }
+}
+
+export class PlaceBetMintermsCall__Inputs {
+  _call: PlaceBetMintermsCall;
+
+  constructor(call: PlaceBetMintermsCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get outcomeMasks(): Array<BigInt> {
+    return this._call.inputValues[1].value.toBigIntArray();
+  }
+
+  get careMasks(): Array<BigInt> {
+    return this._call.inputValues[2].value.toBigIntArray();
+  }
+
+  get expression(): string {
+    return this._call.inputValues[3].value.toString();
+  }
+}
+
+export class PlaceBetMintermsCall__Outputs {
+  _call: PlaceBetMintermsCall;
+
+  constructor(call: PlaceBetMintermsCall) {
+    this._call = call;
+  }
+
+  get betId(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class ProposeResolutionCall extends ethereum.Call {
+  get inputs(): ProposeResolutionCall__Inputs {
+    return new ProposeResolutionCall__Inputs(this);
+  }
+
+  get outputs(): ProposeResolutionCall__Outputs {
+    return new ProposeResolutionCall__Outputs(this);
+  }
+}
+
+export class ProposeResolutionCall__Inputs {
+  _call: ProposeResolutionCall;
+
+  constructor(call: ProposeResolutionCall) {
+    this._call = call;
+  }
+
+  get marketId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get outcomeVector(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+
+  get claim(): string {
+    return this._call.inputValues[2].value.toString();
+  }
+}
+
+export class ProposeResolutionCall__Outputs {
+  _call: ProposeResolutionCall;
+
+  constructor(call: ProposeResolutionCall) {
+    this._call = call;
+  }
+
+  get assertionId(): Bytes {
+    return this._call.outputValues[0].value.toBytes();
+  }
+}
+
+export class WithdrawTreasuryFeesCall extends ethereum.Call {
+  get inputs(): WithdrawTreasuryFeesCall__Inputs {
+    return new WithdrawTreasuryFeesCall__Inputs(this);
+  }
+
+  get outputs(): WithdrawTreasuryFeesCall__Outputs {
+    return new WithdrawTreasuryFeesCall__Outputs(this);
+  }
+}
+
+export class WithdrawTreasuryFeesCall__Inputs {
+  _call: WithdrawTreasuryFeesCall;
+
+  constructor(call: WithdrawTreasuryFeesCall) {
+    this._call = call;
+  }
+
+  get recipient(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class WithdrawTreasuryFeesCall__Outputs {
+  _call: WithdrawTreasuryFeesCall;
+
+  constructor(call: WithdrawTreasuryFeesCall) {
+    this._call = call;
   }
 }

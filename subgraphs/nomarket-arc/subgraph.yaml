@@ -8,9 +8,9 @@ dataSources:
     name: NoMarketArc
     network: arc-testnet
     source:
-      address: "0x564a0c5827256a438b7719b713378c9fbc64a1b1"
+      address: "0x7fc7eb0f9a9387dd318a8ae5d2fcd7d1ca58a2ed"
       abi: NoMarketArc
-      startBlock: 45542185
+      startBlock: 47104026
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -30,10 +30,20 @@ dataSources:
           handler: handleMarketMetadata
         - event: MarketLifecycleConfigured(indexed uint256,uint64,uint64,uint64,uint256)
           handler: handleMarketLifecycleConfigured
+        - event: MarketCreationFeePaid(indexed uint256,indexed address,uint256)
+          handler: handleMarketCreationFeePaid
         - event: BetPlaced(indexed uint256,indexed uint256,indexed address,uint256,uint256,uint256,string)
           handler: handleBetPlaced
+        - event: BetFeeCollected(indexed uint256,indexed uint256,uint256)
+          handler: handleBetFeeCollected
+        - event: BetMinterm(indexed uint256,indexed uint256,indexed uint16,uint256,uint256)
+          handler: handleBetMinterm
         - event: UmaResolutionProposed(indexed uint256,indexed bytes32,uint256,string)
           handler: handleUmaResolutionProposed
         - event: MarketResolved(indexed uint256,uint256)
           handler: handleMarketResolved
+        - event: BetClaimed(indexed uint256,indexed uint256,indexed address,uint256)
+          handler: handleBetClaimed
+        - event: CreatorFeesPaid(indexed uint256,indexed address,uint256)
+          handler: handleCreatorFeesPaid
       file: ./src/no-market-arc.ts

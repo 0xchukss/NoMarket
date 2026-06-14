@@ -1,7 +1,11 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
+  BetFeeCollected,
   BetPlaced,
+  CreatorFeesPaid,
   MarketCreated,
+  MarketCreationFeePaid,
+  MarketLifecycleConfigured,
   MarketResolved,
   UmaResolutionProposed
 } from "../generated/NoMarket/NoMarket";
@@ -26,12 +30,37 @@ export function handleMarketCreated(event: MarketCreated): void {
   market.resolved = false;
   market.outcomeVector = BigInt.zero();
   market.assertionId = zeroBytes();
+  market.tradingEndTime = BigInt.zero();
+  market.eventOccurrenceTime = BigInt.zero();
+  market.resolutionTime = BigInt.zero();
+  market.creatorDeposit = BigInt.zero();
   market.totalStake = BigInt.zero();
+  market.totalFees = BigInt.zero();
   market.betCount = BigInt.zero();
+  market.creatorFeesPaid = false;
   market.createdAtBlock = event.block.number;
   market.createdAtTimestamp = event.block.timestamp;
   market.transactionHash = event.transaction.hash;
   market.save();
+}
+
+export function handleMarketLifecycleConfigured(event: MarketLifecycleConfigured): void {
+  const market = loadMarket(event.params.marketId);
+  if (market) {
+    market.tradingEndTime = event.params.tradingEndTime;
+    market.eventOccurrenceTime = event.params.eventOccurrenceTime;
+    market.resolutionTime = event.params.resolutionTime;
+    market.creatorDeposit = event.params.creationFeePaid;
+    market.save();
+  }
+}
+
+export function handleMarketCreationFeePaid(event: MarketCreationFeePaid): void {
+  const market = loadMarket(event.params.marketId);
+  if (market) {
+    market.creatorDeposit = event.params.amount;
+    market.save();
+  }
 }
 
 export function handleBetPlaced(event: BetPlaced): void {
@@ -44,12 +73,15 @@ export function handleBetPlaced(event: BetPlaced): void {
   bet.bettor = event.params.bettor;
   bet.stake = event.params.publicStake;
   bet.publicStake = event.params.publicStake;
+  bet.fee = BigInt.zero();
   bet.encryptedStakeHandle = event.params.encryptedStakeHandle;
   bet.encryptedOutcomeMaskHandle = event.params.encryptedOutcomeMaskHandle;
   bet.encryptedCareMaskHandle = event.params.encryptedCareMaskHandle;
   bet.outcomeMask = BigInt.zero();
   bet.careMask = BigInt.zero();
   bet.expression = "";
+  bet.claimed = false;
+  bet.payout = BigInt.zero();
   bet.transactionHash = event.transaction.hash;
   bet.blockNumber = event.block.number;
   bet.blockTimestamp = event.block.timestamp;
@@ -58,6 +90,19 @@ export function handleBetPlaced(event: BetPlaced): void {
   if (market) {
     market.totalStake = market.totalStake.plus(event.params.publicStake);
     market.betCount = market.betCount.plus(BigInt.fromI32(1));
+    market.save();
+  }
+}
+
+export function handleBetFeeCollected(event: BetFeeCollected): void {
+  const bet = Bet.load(event.params.marketId.toString() + "-" + event.params.betId.toString());
+  if (bet) {
+    bet.fee = event.params.fee;
+    bet.save();
+  }
+  const market = loadMarket(event.params.marketId);
+  if (market) {
+    market.totalFees = market.totalFees.plus(event.params.fee);
     market.save();
   }
 }
@@ -100,6 +145,14 @@ export function handleMarketResolved(event: MarketResolved): void {
   if (market) {
     market.resolved = true;
     market.outcomeVector = outcomeVector;
+    market.save();
+  }
+}
+
+export function handleCreatorFeesPaid(event: CreatorFeesPaid): void {
+  const market = loadMarket(event.params.marketId);
+  if (market) {
+    market.creatorFeesPaid = true;
     market.save();
   }
 }

@@ -159,6 +159,58 @@ export class Market extends Entity {
     }
   }
 
+  get tradingEndTime(): BigInt {
+    let value = this.get("tradingEndTime");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set tradingEndTime(value: BigInt) {
+    this.set("tradingEndTime", Value.fromBigInt(value));
+  }
+
+  get eventOccurrenceTime(): BigInt {
+    let value = this.get("eventOccurrenceTime");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set eventOccurrenceTime(value: BigInt) {
+    this.set("eventOccurrenceTime", Value.fromBigInt(value));
+  }
+
+  get resolutionTime(): BigInt {
+    let value = this.get("resolutionTime");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set resolutionTime(value: BigInt) {
+    this.set("resolutionTime", Value.fromBigInt(value));
+  }
+
+  get creatorDeposit(): BigInt {
+    let value = this.get("creatorDeposit");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set creatorDeposit(value: BigInt) {
+    this.set("creatorDeposit", Value.fromBigInt(value));
+  }
+
   get totalStake(): BigInt {
     let value = this.get("totalStake");
     if (!value || value.kind == ValueKind.NULL) {
@@ -172,6 +224,19 @@ export class Market extends Entity {
     this.set("totalStake", Value.fromBigInt(value));
   }
 
+  get totalFees(): BigInt {
+    let value = this.get("totalFees");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set totalFees(value: BigInt) {
+    this.set("totalFees", Value.fromBigInt(value));
+  }
+
   get betCount(): BigInt {
     let value = this.get("betCount");
     if (!value || value.kind == ValueKind.NULL) {
@@ -183,6 +248,19 @@ export class Market extends Entity {
 
   set betCount(value: BigInt) {
     this.set("betCount", Value.fromBigInt(value));
+  }
+
+  get creatorFeesPaid(): boolean {
+    let value = this.get("creatorFeesPaid");
+    if (!value || value.kind == ValueKind.NULL) {
+      return false;
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set creatorFeesPaid(value: boolean) {
+    this.set("creatorFeesPaid", Value.fromBoolean(value));
   }
 
   get createdAtBlock(): BigInt {
@@ -354,6 +432,19 @@ export class Bet extends Entity {
     this.set("publicStake", Value.fromBigInt(value));
   }
 
+  get fee(): BigInt {
+    let value = this.get("fee");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set fee(value: BigInt) {
+    this.set("fee", Value.fromBigInt(value));
+  }
+
   get encryptedStakeHandle(): Bytes {
     let value = this.get("encryptedStakeHandle");
     if (!value || value.kind == ValueKind.NULL) {
@@ -430,6 +521,32 @@ export class Bet extends Entity {
 
   set expression(value: string) {
     this.set("expression", Value.fromString(value));
+  }
+
+  get claimed(): boolean {
+    let value = this.get("claimed");
+    if (!value || value.kind == ValueKind.NULL) {
+      return false;
+    } else {
+      return value.toBoolean();
+    }
+  }
+
+  set claimed(value: boolean) {
+    this.set("claimed", Value.fromBoolean(value));
+  }
+
+  get payout(): BigInt {
+    let value = this.get("payout");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set payout(value: BigInt) {
+    this.set("payout", Value.fromBigInt(value));
   }
 
   get transactionHash(): Bytes {
