@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "app/.next",
   "crons": [
     {
       "path": "/api/uma-bot/run-due-markets",
