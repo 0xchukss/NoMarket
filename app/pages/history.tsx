@@ -188,6 +188,8 @@ export default function HistoryPage() {
   const [resolutions, setResolutions] = useState<Map<string, ResolutionState>>(new Map());
   const [status, setStatus] = useState<"loading" | "idle" | "error">("loading");
   const [message, setMessage] = useState("");
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [botKickKey, setBotKickKey] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -222,7 +224,11 @@ export default function HistoryPage() {
     return () => {
       cancelled = true;
     };
-  }, [chain]);
+  }, [chain, refreshTick]);
+
+  useEffect(() => {
+    setBotKickKey("");
+  }, [chain.id]);
 
   const visibleBets = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -251,6 +257,26 @@ export default function HistoryPage() {
   }, [address, bets, markets, mode, search]);
 
   const totalStaked = visibleBets.reduce((sum, bet) => sum + bet.publicStake, 0n);
+  const pendingEndedMarketCount = visibleEndedMarkets.filter((market) => {
+    const resolution = resolutionForMarket(market, resolutions);
+    return !resolution.resolved || resolution.outcomeVector === undefined;
+  }).length;
+
+  useEffect(() => {
+    if (status !== "idle" || pendingEndedMarketCount === 0 || botKickKey === chain.id) return;
+    let cancelled = false;
+    setBotKickKey(chain.id);
+    fetch("/api/uma-bot/run-due-markets", { method: "POST" })
+      .then(() => {
+        if (!cancelled) {
+          window.setTimeout(() => setRefreshTick((value) => value + 1), 5_000);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [botKickKey, chain.id, pendingEndedMarketCount, status]);
 
   return (
     <div className="oracle-page">
