@@ -29,6 +29,10 @@ export type OnchainMarketMetadata = {
 
 const DEFAULT_BUFFER_MINUTES = 60;
 const ONE_HOUR_MS = 60 * 60 * 1000;
+const DEFAULT_CREATION_DEPOSIT_WEI: Record<ChainId, string> = {
+  zama: "2000000000000000",
+  arc: "5000000000000000000"
+};
 
 function cleanIso(value: unknown): string | undefined {
   if (typeof value !== "string" || !value.trim()) return undefined;
@@ -63,7 +67,12 @@ export function getCreationDepositWeiForChain(chainId: ChainId) {
     zama: process.env.NEXT_PUBLIC_ZAMA_MARKET_CREATION_DEPOSIT_WEI,
     arc: process.env.NEXT_PUBLIC_ARC_MARKET_CREATION_DEPOSIT_WEI
   };
-  return BigInt(deposits[chainId] || process.env.NEXT_PUBLIC_MARKET_CREATION_DEPOSIT_WEI || "0");
+  return BigInt(deposits[chainId] || process.env.NEXT_PUBLIC_MARKET_CREATION_DEPOSIT_WEI || DEFAULT_CREATION_DEPOSIT_WEI[chainId]);
+}
+
+export function formatCreationDepositDisplay(chainId: ChainId) {
+  if (chainId === "arc") return "5 USDC";
+  return "5 USDT in ETH";
 }
 
 export function getBetFeeBpsForChain(chainId: ChainId) {

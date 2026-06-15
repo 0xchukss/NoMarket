@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { Activity, ArrowUpRight, BarChart3, CircleDollarSign, LockKeyhole, Network, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Activity, ArrowUpRight, BarChart3, CheckCircle2, CircleDollarSign, LockKeyhole, Network, Sparkles, XCircle } from "lucide-react";
 import { CHAIN_ORDER, CHAINS, type ChainConfig } from "../lib/chains";
 import { useSelectedChain } from "../lib/chains/useSelectedChain";
 import type { Market } from "../lib/mockMarkets";
+import type { CreatedMarket } from "../lib/marketStorage";
+import { formatOutcomeVectorBinary } from "../lib/resolution";
+import { isTradingOpen } from "../lib/marketLifecycle";
 import { MarketVisualBadge } from "./MarketVisualBadge";
 
 const nodeTags = ["Boolean claims", "Private liquidity", "UMA automation", "Encrypted payouts", "Conditional markets"];
@@ -192,15 +196,41 @@ export function OracleStatLedger() {
   );
 }
 
-export function OracleSummaryModules({ market }: { market: Market }) {
+type OutcomeSummary = {
+  tradingEnded?: boolean;
+  outcomeVector?: number;
+  atomCount?: number;
+};
+
+function hasCreatedLifecycle(market: Market | CreatedMarket): market is CreatedMarket {
+  return "lifecycle" in market;
+}
+
+function hasResolvedOutcome(market: Market | CreatedMarket) {
+  return hasCreatedLifecycle(market) && market.resolution?.outcomeVector !== undefined;
+}
+
+export function OracleSummaryModules({ market, tradingEnded = false, outcomeVector, atomCount = 0 }: { market: Market } & OutcomeSummary) {
+  const outcomeReady = tradingEnded && outcomeVector !== undefined;
+  const outcomeText = outcomeReady ? `Vector ${outcomeVector}` : tradingEnded ? "Pending" : `${market.probability}%`;
+  const outcomeDetail = outcomeReady ? formatOutcomeVectorBinary(outcomeVector, atomCount) : undefined;
   return (
     <div className="oracle-summary-stack">
       <section className="oracle-panel oracle-state-panel">
         <div>
-          <p className="oracle-kicker">Current probability</p>
-          <strong>{market.probability}%</strong>
+          <p className="oracle-kicker">{tradingEnded ? "Market outcome" : "Current probability"}</p>
+          <strong className={outcomeReady ? "oracle-outcome-value" : tradingEnded ? "oracle-outcome-value pending" : undefined}>
+            {outcomeText}
+          </strong>
+          {outcomeDetail && <span className="oracle-outcome-binary">{outcomeDetail}</span>}
         </div>
-        <Sparkles className="oracle-sigil" />
+        {outcomeReady ? (
+          <CheckCircle2 className="oracle-sigil oracle-sigil--success" />
+        ) : tradingEnded ? (
+          <XCircle className="oracle-sigil oracle-sigil--pending" />
+        ) : (
+          <Sparkles className="oracle-sigil" />
+        )}
       </section>
       <section className="oracle-panel oracle-meta-panel">
         <h3>Market Stats</h3>
@@ -218,11 +248,16 @@ export function MarketRows({
   emptyMessage = "No markets found.",
   emptyHint = "Try another title, category, atom, outcome, or network term."
 }: {
-  markets: Market[];
+  markets: Array<Market | CreatedMarket>;
   chain: ChainConfig;
   emptyMessage?: string;
   emptyHint?: string;
 }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
   const rows = markets.slice(0, 9);
   const networkLabel = chain.shortName.toUpperCase();
   return (
@@ -241,22 +276,46 @@ export function MarketRows({
           <span>{emptyHint}</span>
         </div>
       )}
-      {rows.map((market, index) => (
-        <div key={market.id} className="oracle-table-row">
-          <div className="oracle-market-name">
-            <BarChart3 className="h-4 w-4 text-[#e2b66a]" />
-            <MarketVisualBadge market={market} size="sm" />
-            <span>{market.title}</span>
+      {rows.map((market) => {
+        const tradingOpen = !hasCreatedLifecycle(market) || isTradingOpen(market.lifecycle, now);
+        const outcomeReady = hasResolvedOutcome(market);
+        return (
+          <div key={market.id} className={tradingOpen ? "oracle-table-row" : "oracle-table-row is-ended"}>
+            <div className="oracle-market-name">
+              <BarChart3 className="h-4 w-4 text-[#e2b66a]" />
+              <MarketVisualBadge market={market} size="sm" />
+              <span>{market.title}</span>
+            </div>
+            <span className={tradingOpen ? undefined : outcomeReady ? "oracle-market-outcome is-confirmed" : "oracle-market-outcome is-pending"}>
+              {tradingOpen ? (
+                `${market.probability}%`
+              ) : outcomeReady ? (
+                <>
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Outcome
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-3.5 w-3.5" />
+                  Pending
+                </>
+              )}
+            </span>
+            <span>{market.volume.replace("$", "")}</span>
+            <span className={`oracle-mini-network oracle-mini-network--${chain.id}`}>{networkLabel}</span>
+            <span className={tradingOpen ? "oracle-status" : "oracle-status ended"}>{tradingOpen ? "Active" : "Ended"}</span>
+            {tradingOpen ? (
+              <Link href={`/market/${market.id}`} className="oracle-row-action">
+                Open <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : (
+              <button type="button" disabled className="oracle-row-action is-disabled">
+                Open <ArrowUpRight className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
-          <span>{market.probability}%</span>
-          <span>{market.volume.replace("$", "")}</span>
-          <span className={`oracle-mini-network oracle-mini-network--${chain.id}`}>{networkLabel}</span>
-          <span className={index % 4 === 2 ? "oracle-status muted" : index % 5 === 4 ? "oracle-status silver" : "oracle-status"}>{index % 4 === 2 ? "Expired" : index % 5 === 4 ? "Settling" : "Active"}</span>
-          <Link href={`/market/${market.id}`} className="oracle-row-action">
-            Open <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

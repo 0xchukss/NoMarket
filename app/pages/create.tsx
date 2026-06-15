@@ -11,6 +11,7 @@ import { defaultUmaResolver } from "../lib/switchboardOracle";
 import { useSelectedChain } from "../lib/chains/useSelectedChain";
 import {
   buildMarketLifecycle,
+  formatCreationDepositDisplay,
   formatLifecycleDate,
   getCreationDepositWeiForChain,
   getDefaultLifecycleInput
@@ -87,6 +88,7 @@ export default function CreateMarketPage() {
     }
   }, [chain.id, lifecycleInput]);
   const creationDepositWei = getCreationDepositWeiForChain(chain.id);
+  const creationDepositDisplay = formatCreationDepositDisplay(chain.id);
   const visualPreview = useMemo(
     () =>
       buildMarketVisual({
@@ -511,8 +513,8 @@ export default function CreateMarketPage() {
 
             <section className="oracle-panel oracle-create-stat">
               <p className="oracle-kicker">Creation Fee</p>
-              <strong>{creationDepositWei.toString()}</strong>
-              <span>{chain.nativeCurrency} wei</span>
+              <strong>{creationDepositWei > 0n ? creationDepositDisplay : "None"}</strong>
+              <span>{chain.shortName} market creation deposit</span>
               <p>This fee is required when the market is confirmed on-chain.</p>
             </section>
           </aside>

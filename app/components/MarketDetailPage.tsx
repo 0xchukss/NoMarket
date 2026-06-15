@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEncrypt } from "@zama-fhe/react-sdk";
-import { Bookmark, ChevronDown, ChevronLeft, Clock, Lock, Share2 } from "lucide-react";
+import { Bookmark, CheckCircle2, ChevronDown, ChevronLeft, Clock, Lock, Share2, XCircle } from "lucide-react";
 import { bytesToHex, decodeEventLog, formatEther, parseEther, type Hex } from "viem";
 import { useAccount, usePublicClient, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { Market, Outcome } from "../lib/mockMarkets";
@@ -38,6 +38,7 @@ import {
 } from "../lib/resolution";
 import {
   buildOnchainMarketMetadata,
+  formatCreationDepositDisplay,
   formatLifecycleDate,
   getBetFeeBpsForChain,
   getCreationDepositWeiForChain,
@@ -563,6 +564,8 @@ export function MarketDetailPage() {
   const selectedCreatedMarket = hasCreatedAtoms(selectedMarket) ? selectedMarket : undefined;
   const marketChain = selectedCreatedMarket ? getChainConfig(selectedCreatedMarket.onchain.chainId) : selectedChain;
   const selectedMarketId = typeof router.query.id === "string" ? router.query.id : "";
+  const tradingEnded = selectedCreatedMarket ? !isTradingOpen(selectedCreatedMarket.lifecycle) : false;
+  const resolvedOutcomeVector = selectedCreatedMarket?.resolution.outcomeVector;
   const marketDetail: MarketDetail = selectedMarket
     ? {
         title: selectedMarket.title,
@@ -645,7 +648,12 @@ export function MarketDetailPage() {
               </div>
 
               <aside className="oracle-detail-right">
-                <OracleSummaryModules market={displayMarket as Market} />
+                <OracleSummaryModules
+                  market={displayMarket as Market}
+                  tradingEnded={tradingEnded}
+                  outcomeVector={resolvedOutcomeVector}
+                  atomCount={selectedCreatedMarket?.atoms.length}
+                />
                 {marketDetail.atoms?.length ? (
                   <CombiTradePanel
                     market={selectedCreatedMarket}
@@ -702,6 +710,7 @@ function MarketLifecyclePanel({ market }: { market: CreatedMarket }) {
           ? "Resolution buffer"
           : "Resolver ready";
   const creationFee = BigInt(market.lifecycle.creationDepositWei || "0");
+  const creationFeeLabel = formatCreationDepositDisplay(market.onchain.chainId);
 
   return (
     <section className="mt-5 rounded-2xl border border-white/8 bg-card p-4">
@@ -734,7 +743,7 @@ function MarketLifecyclePanel({ market }: { market: CreatedMarket }) {
         <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
           <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Creation fee</p>
           <p className="mt-1 text-sm font-black text-white">
-            {creationFee > 0n ? `${creationFee.toString()} wei` : "Not required"}
+            {creationFee > 0n ? creationFeeLabel : "Not required"}
           </p>
           <p className="mt-2 text-[11px] text-slate-500">
             {creationFee > 0n ? `Required to create a ${chain.shortName} market.` : `${chain.shortName} currently has no creation fee configured.`}
@@ -756,6 +765,14 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
     market.onchain.materialized ? "done" : "idle"
   );
   const [materializeMessage, setMaterializeMessage] = useState("");
+  const [now, setNow] = useState(Date.now());
+  const tradingOpen = isTradingOpen(market.lifecycle, now);
+  const outcomeVector = market.resolution.outcomeVector;
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
 
   async function materializeMarket() {
     setMaterializeStatus("loading");
@@ -906,7 +923,11 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
         <p className="text-[10px] font-black uppercase tracking-wide text-blue-300">{chain.shortName} status</p>
         {market.onchain.materialized ? (
           <p className="mt-1 text-xs font-bold leading-5 text-emerald-300">
-            This market is live on {chain.name} through the configured NoMarket contract.
+            {tradingOpen
+              ? `This market is live on ${chain.name} through the configured NoMarket contract.`
+              : outcomeVector !== undefined
+                ? `Trading has ended on ${chain.shortName}. The market outcome is confirmed.`
+                : `Trading has ended on ${chain.shortName}. The automated resolver is finalizing the outcome.`}
           </p>
         ) : (
           <p className="mt-2 text-[11px] leading-5 text-amber-200/80">
@@ -930,23 +951,43 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
         )}
       </div>
       <div className="mt-3 grid gap-2">
-        {market.atoms.map((atom, index) => (
-          <div key={`${atom.description}-${index}`} className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-wide text-slate-600">Atom {index}</p>
-                <p className="mt-1 text-sm font-bold text-slate-100">{atom.description}</p>
+        {market.atoms.map((atom, index) => {
+          const atomResolved = outcomeVector !== undefined ? Boolean(outcomeVector & (1 << index)) : undefined;
+          return (
+            <div key={`${atom.description}-${index}`} className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-600">Atom {index}</p>
+                  <p className="mt-1 text-sm font-bold text-slate-100">{atom.description}</p>
+                </div>
+                {tradingOpen ? (
+                  <span className="rounded-lg bg-white/[0.04] px-2 py-1 text-[11px] font-bold text-slate-400">
+                    UMA resolver
+                  </span>
+                ) : atomResolved === undefined ? (
+                  <span className="oracle-atom-result is-pending">
+                    <Clock className="h-3.5 w-3.5" />
+                    Pending
+                  </span>
+                ) : atomResolved ? (
+                  <span className="oracle-atom-result is-true">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    TRUE
+                  </span>
+                ) : (
+                  <span className="oracle-atom-result is-false">
+                    <XCircle className="h-3.5 w-3.5" />
+                    FALSE
+                  </span>
+                )}
               </div>
-              <span className="rounded-lg bg-white/[0.04] px-2 py-1 text-[11px] font-bold text-slate-400">
-                UMA resolver
-              </span>
+              <div className="mt-3 rounded-lg border border-blue-400/15 bg-blue-400/8 p-3">
+                <p className="text-[10px] font-black uppercase tracking-wide text-blue-300">Resolution rule</p>
+                <p className="mt-1 text-xs font-bold leading-5 text-slate-200">{describeUmaRule(atom.uma)}</p>
+              </div>
             </div>
-            <div className="mt-3 rounded-lg border border-blue-400/15 bg-blue-400/8 p-3">
-              <p className="text-[10px] font-black uppercase tracking-wide text-blue-300">Resolution rule</p>
-              <p className="mt-1 text-xs font-bold leading-5 text-slate-200">{describeUmaRule(atom.uma)}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
