@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ExternalLink, Lock, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
 import { Header } from "../components/Header";
-import { OracleFormulaVeil } from "../components/OracleVisuals";
 import { SEED_MARKETS } from "../lib/seedMarkets";
 
 const CONTRACT_ADDRESS = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
@@ -33,63 +32,56 @@ const HOW_IT_WORKS = [
 
 export default function Home() {
   return (
-    <div className="oracle-page">
+    <div className="min-h-screen bg-base text-foreground">
       <Header />
-      <OracleFormulaVeil />
 
-      <main className="oracle-home">
+      <main className="max-w-5xl mx-auto px-6 pt-24 pb-12">
         {/* HERO */}
-        <section className="oracle-hero">
-          <div className="oracle-hero-copy">
-            <p className="oracle-kicker">Private combinatorial prediction markets</p>
-            <h1>Bet in the dark.</h1>
-            <p>Everyone sees the stake. No one sees the bet.</p>
-            <div className="oracle-hero-actions">
-              <Link
-                href="/create"
-                className="bg-accent rounded-lg font-bold px-6 py-3 text-sm inline-flex items-center gap-2 transition-transform hover:-translate-y-px"
-                style={{ color: "#0A0B0D", fontFamily: "var(--oracle-serif)" }}
-              >
-                Seal your first bet
-              </Link>
-              <Link href="/markets" className="oracle-quiet-button">
-                Browse markets
-              </Link>
-            </div>
+        <section className="text-center py-20">
+          <p className="text-muted text-xs tracking-widest uppercase mb-4 font-mono">
+            Private combinatorial prediction markets
+          </p>
+          <h1 className="text-5xl md:text-7xl font-bold font-display mb-6">
+            Bet in the dark.
+          </h1>
+          <p className="text-lg text-muted mb-10 max-w-xl mx-auto">
+            Everyone sees the stake. No one sees the bet.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Link
+              href="/create"
+              className="bg-accent text-base font-bold px-6 py-3 rounded-lg text-sm inline-flex items-center gap-2 transition-transform hover:-translate-y-px"
+            >
+              Seal your first bet
+            </Link>
+            <Link
+              href="/markets"
+              className="border border-border text-muted hover:text-foreground px-6 py-3 rounded-lg text-sm transition-colors"
+            >
+              Browse markets
+            </Link>
           </div>
         </section>
 
         {/* HOW IT WORKS */}
-        <section className="mt-20 mb-16">
-          <p className="oracle-kicker text-center mb-8">How it works</p>
-          <div className="oracle-landing-cards">
+        <section className="mt-16 mb-20">
+          <p className="text-muted text-xs tracking-widest uppercase text-center mb-10 font-mono">
+            How it works
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {HOW_IT_WORKS.map(({ step, icon: Icon, title, desc }) => (
-              <div key={step} className="oracle-card">
-                <div className="flex items-center gap-3 mb-3">
-                  <span
-                    className="text-accent-2"
-                    style={{
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "0.68rem",
-                      opacity: 0.7,
-                    }}
-                  >
+              <div
+                key={step}
+                className="bg-surface border border-border rounded-2xl p-6 hover:shadow-glow transition-shadow"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-accent-2 font-mono text-xs opacity-70">
                     {step}
                   </span>
                   <Icon className="w-5 h-5 text-accent-2" />
                 </div>
-                <h3>{title}</h3>
-                <p
-                  className="text-muted"
-                  style={{
-                    margin: 0,
-                    fontFamily: "var(--oracle-mono)",
-                    fontSize: "0.82rem",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {desc}
-                </p>
+                <h3 className="text-foreground font-semibold mb-2">{title}</h3>
+                <p className="text-muted text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -97,237 +89,91 @@ export default function Home() {
 
         {/* WHAT THE CHAIN SEES */}
         <section className="mb-20">
-          <p className="oracle-kicker text-center mb-8">What the chain sees</p>
-          <div
-            className="oracle-panel"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              overflow: "hidden",
-            }}
-          >
+          <p className="text-muted text-xs tracking-widest uppercase text-center mb-10 font-mono">
+            What the chain sees
+          </p>
+          <div className="bg-surface border border-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
             {/* Left: on-chain encrypted view */}
-            <div
-              className="border-border"
-              style={{
-                padding: "28px 24px",
-                borderRight: "1px solid rgba(231, 233, 236, 0.12)",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-5">
+            <div className="p-7 border-b md:border-b-0 md:border-r border-border">
+              <div className="flex items-center gap-2 mb-6">
                 <Lock className="w-4 h-4 text-accent-2" />
-                <span
-                  className="text-accent-2"
-                  style={{
-                    fontFamily: "var(--oracle-mono)",
-                    fontSize: "0.68rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
+                <span className="text-accent-2 font-mono text-xs uppercase tracking-wider">
                   On-chain (encrypted)
                 </span>
               </div>
 
-              <div style={{ display: "grid", gap: 14 }}>
+              <div className="space-y-4">
                 <div>
-                  <span
-                    className="text-muted"
-                    style={{
-                      display: "block",
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "0.64rem",
-                      textTransform: "uppercase",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <span className="text-muted font-mono text-xs uppercase block mb-1">
                     Stake
                   </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#f4d58d",
-                    }}
-                  >
+                  <span className="text-foreground font-mono text-2xl font-bold">
                     2.0 ETH
                   </span>
                 </div>
 
                 <div>
-                  <span
-                    className="text-muted"
-                    style={{
-                      display: "block",
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "0.64rem",
-                      textTransform: "uppercase",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <span className="text-muted font-mono text-xs uppercase block mb-1">
                     Encrypted position
                   </span>
-                  <span
-                    className="text-accent-2"
-                    style={{
-                      display: "block",
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "0.72rem",
-                      wordBreak: "break-all",
-                      lineHeight: 1.65,
-                      opacity: 0.78,
-                    }}
-                  >
+                  <span className="text-accent-2 font-mono text-sm break-all leading-relaxed opacity-80">
                     {CIPHERTEXT_PREVIEW}
                   </span>
                 </div>
 
-                <div
-                  style={{
-                    padding: "7px 10px",
-                    borderRadius: 6,
-                    border: "1px solid rgba(124, 92, 255, 0.22)",
-                    background: "rgba(124, 92, 255, 0.08)",
-                    fontFamily: "var(--oracle-mono)",
-                    fontSize: "0.68rem",
-                    color: "rgba(124, 92, 255, 0.8)",
-                  }}
-                >
+                <div className="px-3 py-2 rounded-md border border-accent-2/20 bg-accent-2/10 font-mono text-xs text-accent-2/80">
                   Zama FHEVM ciphertext
                 </div>
               </div>
             </div>
 
             {/* Right: plaintext private view */}
-            <div style={{ padding: "28px 24px" }}>
-              <div className="flex items-center gap-2 mb-5">
-                <ShieldCheck className="w-4 h-4" style={{ color: "rgba(198, 242, 78, 0.78)" }} />
-                <span
-                  style={{
-                    fontFamily: "var(--oracle-mono)",
-                    fontSize: "0.68rem",
-                    color: "rgba(198, 242, 78, 0.78)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
+            <div className="p-7">
+              <div className="flex items-center gap-2 mb-6">
+                <ShieldCheck className="w-4 h-4 text-accent" />
+                <span className="text-accent font-mono text-xs uppercase tracking-wider">
                   Your view (private)
                 </span>
               </div>
 
-              <div style={{ display: "grid", gap: 14 }}>
+              <div className="space-y-4">
                 <div>
-                  <span
-                    className="text-muted"
-                    style={{
-                      display: "block",
-                      fontFamily: "var(--oracle-mono)",
-                      fontSize: "0.64rem",
-                      textTransform: "uppercase",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <span className="text-muted font-mono text-xs uppercase block mb-1">
                     Condition
                   </span>
-                  <span
-                    className="text-foreground"
-                    style={{
-                      fontFamily: "var(--oracle-serif)",
-                      fontSize: "0.96rem",
-                      lineHeight: 1.5,
-                    }}
-                  >
+                  <span className="text-foreground text-base leading-relaxed">
                     Fed cuts rates AND BTC &gt; $100k by Q4 2026
                   </span>
                 </div>
 
                 <div className="flex gap-8">
                   <div>
-                    <span
-                      className="text-muted"
-                      style={{
-                        display: "block",
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.64rem",
-                        textTransform: "uppercase",
-                        marginBottom: 4,
-                      }}
-                    >
+                    <span className="text-muted font-mono text-xs uppercase block mb-1">
                       Position
                     </span>
-                    <span
-                      className="text-positive"
-                      style={{
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                      }}
-                    >
+                    <span className="text-positive font-mono text-lg font-bold">
                       YES
                     </span>
                   </div>
                   <div>
-                    <span
-                      className="text-muted"
-                      style={{
-                        display: "block",
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.64rem",
-                        textTransform: "uppercase",
-                        marginBottom: 4,
-                      }}
-                    >
+                    <span className="text-muted font-mono text-xs uppercase block mb-1">
                       Odds
                     </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                        color: "#f4d58d",
-                      }}
-                    >
+                    <span className="text-accent font-mono text-lg font-bold">
                       34%
                     </span>
                   </div>
                   <div>
-                    <span
-                      className="text-muted"
-                      style={{
-                        display: "block",
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.64rem",
-                        textTransform: "uppercase",
-                        marginBottom: 4,
-                      }}
-                    >
+                    <span className="text-muted font-mono text-xs uppercase block mb-1">
                       Stake
                     </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "1.1rem",
-                        fontWeight: 700,
-                        color: "#f4d58d",
-                      }}
-                    >
+                    <span className="text-accent font-mono text-lg font-bold">
                       2.0 ETH
                     </span>
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    padding: "7px 10px",
-                    borderRadius: 6,
-                    border: "1px solid rgba(52, 211, 153, 0.22)",
-                    background: "rgba(52, 211, 153, 0.07)",
-                    fontFamily: "var(--oracle-mono)",
-                    fontSize: "0.68rem",
-                    color: "rgba(52, 211, 153, 0.8)",
-                  }}
-                >
+                <div className="px-3 py-2 rounded-md border border-positive/20 bg-positive/10 font-mono text-xs text-positive/80">
                   Visible only to you via FHE decryption key
                 </div>
               </div>
@@ -337,70 +183,42 @@ export default function Home() {
 
         {/* ACTIVE MARKETS */}
         <section className="mb-20">
-          <p className="oracle-kicker text-center mb-8">Active markets</p>
-          <div className="oracle-landing-cards">
+          <p className="text-muted text-xs tracking-widest uppercase text-center mb-10 font-mono">
+            Active markets
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {SEED_MARKETS.map((m) => (
-              <div key={m.id} className="oracle-card">
-                <p
-                  className="text-foreground"
-                  style={{
-                    margin: "0 0 14px",
-                    fontFamily: "var(--oracle-serif)",
-                    fontSize: "0.96rem",
-                    lineHeight: 1.5,
-                  }}
-                >
+              <div
+                key={m.id}
+                className="bg-surface border border-border rounded-2xl p-6 hover:shadow-glow transition-shadow"
+              >
+                <p className="text-foreground text-base leading-relaxed mb-4">
                   {m.condition}
                 </p>
 
-                <div className="flex gap-5 mb-4">
+                <div className="flex gap-5 mb-5">
                   <div>
-                    <span
-                      className="text-muted"
-                      style={{
-                        display: "block",
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.62rem",
-                        textTransform: "uppercase",
-                      }}
-                    >
+                    <span className="text-muted font-mono text-xs uppercase block">
                       Staked
                     </span>
-                    <strong
-                      style={{
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.88rem",
-                        color: "#f4d58d",
-                      }}
-                    >
+                    <strong className="text-accent font-mono text-sm">
                       {m.ethStaked} ETH
                     </strong>
                   </div>
                   <div>
-                    <span
-                      className="text-muted"
-                      style={{
-                        display: "block",
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.62rem",
-                        textTransform: "uppercase",
-                      }}
-                    >
+                    <span className="text-muted font-mono text-xs uppercase block">
                       Odds
                     </span>
-                    <strong
-                      className="text-accent"
-                      style={{
-                        fontFamily: "var(--oracle-mono)",
-                        fontSize: "0.88rem",
-                      }}
-                    >
+                    <strong className="text-accent font-mono text-sm">
                       {m.odds}%
                     </strong>
                   </div>
                 </div>
 
-                <Link href="/create" className="oracle-card-action block text-center">
+                <Link
+                  href="/create"
+                  className="block text-center bg-accent text-base font-bold px-4 py-2.5 rounded-lg text-sm transition-transform hover:-translate-y-px"
+                >
                   Seal a bet
                 </Link>
               </div>
@@ -409,75 +227,33 @@ export default function Home() {
         </section>
 
         {/* FOOTER */}
-        <footer
-          className="border-t border-border"
-          style={{
-            paddingTop: 28,
-            paddingBottom: 52,
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 24,
-          }}
-        >
-          <div style={{ display: "grid", gap: 5 }}>
-            <span
-              className="text-muted"
-              style={{
-                fontFamily: "var(--oracle-mono)",
-                fontSize: "0.64rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-              }}
-            >
+        <footer className="border-t border-border pt-7 pb-14 flex flex-wrap items-start justify-between gap-6">
+          <div className="space-y-1">
+            <span className="text-muted font-mono text-xs uppercase tracking-wider">
               Contract
             </span>
-            <span
-              className="text-foreground"
-              style={{ fontFamily: "var(--oracle-mono)", fontSize: "0.8rem" }}
-            >
+            <span className="text-foreground font-mono text-sm">
               {CONTRACT_ADDRESS}
             </span>
             <a
               href={`https://etherscan.io/address/${CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1"
-              style={{
-                fontFamily: "var(--oracle-mono)",
-                fontSize: "0.7rem",
-                color: "rgba(198, 242, 78, 0.72)",
-                marginTop: 2,
-              }}
+              className="inline-flex items-center gap-1 text-accent/70 font-mono text-xs mt-1 hover:text-accent transition-colors"
             >
               Verified on Etherscan
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
-          <div style={{ display: "grid", gap: 5, textAlign: "right" }}>
-            <span
-              className="text-muted"
-              style={{
-                fontFamily: "var(--oracle-mono)",
-                fontSize: "0.64rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-              }}
-            >
+          <div className="space-y-1 text-right">
+            <span className="text-muted font-mono text-xs uppercase tracking-wider">
               Settlement oracle
             </span>
-            <span
-              className="text-foreground"
-              style={{ fontFamily: "var(--oracle-mono)", fontSize: "0.8rem" }}
-            >
+            <span className="text-foreground font-mono text-sm">
               UMA Optimistic Oracle v3
             </span>
-            <span
-              className="text-muted"
-              style={{ fontFamily: "var(--oracle-mono)", fontSize: "0.7rem" }}
-            >
+            <span className="text-muted font-mono text-xs">
               Dispute window: 2 hours
             </span>
           </div>
