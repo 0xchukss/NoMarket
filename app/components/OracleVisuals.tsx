@@ -207,7 +207,7 @@ function hasCreatedLifecycle(market: Market | CreatedMarket): market is CreatedM
 }
 
 function hasResolvedOutcome(market: Market | CreatedMarket) {
-  return hasCreatedLifecycle(market) && market.resolution?.outcomeVector !== undefined;
+  return hasCreatedLifecycle(market) && market.resolution?.status === "resolved" && market.resolution?.outcomeVector !== undefined;
 }
 
 export function OracleSummaryModules({ market, tradingEnded = false, outcomeVector, atomCount = 0 }: { market: Market } & OutcomeSummary) {
@@ -304,15 +304,9 @@ export function MarketRows({
             <span>{market.volume.replace("$", "")}</span>
             <span className={`oracle-mini-network oracle-mini-network--${chain.id}`}>{networkLabel}</span>
             <span className={tradingOpen ? "oracle-status" : "oracle-status ended"}>{tradingOpen ? "Active" : "Ended"}</span>
-            {tradingOpen ? (
-              <Link href={`/market/${market.id}`} className="oracle-row-action">
-                Open <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            ) : (
-              <button type="button" disabled className="oracle-row-action is-disabled">
-                Open <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
-            )}
+            <Link href={`/market/${market.id}`} className="oracle-row-action">
+              Open <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         );
       })}

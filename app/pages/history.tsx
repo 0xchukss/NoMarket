@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Clock3, Search } from "lucide-react";
+import { ArrowUpRight, Clock3, Search } from "lucide-react";
 import { createPublicClient, decodeEventLog, formatEther, http, type Hex } from "viem";
 import { useAccount } from "wagmi";
 import { Header } from "../components/Header";
@@ -12,6 +12,7 @@ import { getNoMarketContractAbi, getNoMarketContractAddress, getNoMarketDeployBl
 import { fetchIndexedMarkets, mergeIndexedAndLocalMarkets } from "../lib/marketIndex";
 import { loadCreatedMarkets, type CreatedMarket } from "../lib/marketStorage";
 import { formatOutcomeVectorBinary } from "../lib/resolution";
+import { isTradingOpen } from "../lib/marketLifecycle";
 
 type HistoryBet = {
   market: CreatedMarket;
@@ -36,10 +37,19 @@ function shortAddress(address: string) {
 }
 
 function resultForBet(bet: HistoryBet, resolution?: ResolutionState) {
-  if (resolution?.outcomeVector === undefined) return { label: "Pending result", className: "bg-amber-500/15 text-amber-200" };
+  if (!resolution?.resolved || resolution.outcomeVector === undefined) return { label: "Pending result", className: "bg-amber-500/15 text-amber-200" };
   if (bet.outcomeMask === undefined || bet.careMask === undefined) return { label: "Resolved privately", className: "bg-violet-500/15 text-violet-200" };
   const matched = (resolution.outcomeVector & Number(bet.careMask)) === Number(bet.outcomeMask);
   return matched ? { label: "Won", className: "bg-emerald-500/15 text-emerald-300" } : { label: "Lost", className: "bg-red-500/15 text-red-300" };
+}
+
+function resolutionForMarket(market: CreatedMarket, resolutions: Map<string, ResolutionState>) {
+  const indexed = resolutions.get(market.onchain.marketId);
+  if (indexed) return indexed;
+  return {
+    resolved: market.resolution.status === "resolved",
+    outcomeVector: market.resolution.status === "resolved" ? market.resolution.outcomeVector : undefined
+  };
 }
 
 async function fetchSubgraphBets(chain: ChainConfig, markets: CreatedMarket[]) {
@@ -224,6 +234,22 @@ export default function HistoryPage() {
       });
   }, [address, bets, mode, search]);
 
+  const visibleEndedMarkets = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const personalMarketIds = new Set(
+      bets
+        .filter((bet) => address && bet.bettor.toLowerCase() === address.toLowerCase())
+        .map((bet) => bet.market.onchain.marketId)
+    );
+    return markets
+      .filter((market) => !isTradingOpen(market.lifecycle))
+      .filter((market) => mode === "general" || personalMarketIds.has(market.onchain.marketId) || market.onchain.creator.toLowerCase() === address?.toLowerCase())
+      .filter((market) => {
+        if (!query) return true;
+        return [market.title, market.category, market.onchain.marketId, market.volume].join(" ").toLowerCase().includes(query);
+      });
+  }, [address, bets, markets, mode, search]);
+
   const totalStaked = visibleBets.reduce((sum, bet) => sum + bet.publicStake, 0n);
 
   return (
@@ -276,9 +302,48 @@ export default function HistoryPage() {
             <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-500/10 p-4 text-xs font-bold text-amber-100">{message}</div>
           ) : mode === "personal" && !address ? (
             <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-white/[0.025] p-6 text-center text-xs font-bold text-slate-500">Connect your wallet to see your personal old placed bets.</div>
-          ) : visibleBets.length === 0 ? (
+          ) : visibleBets.length === 0 && visibleEndedMarkets.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-white/[0.025] p-6 text-center text-xs font-bold text-slate-500">No history found for this view.</div>
           ) : (
+            <>
+              {visibleEndedMarkets.length > 0 && (
+                <div className="mt-4 overflow-hidden rounded-xl border border-white/7">
+                  <div className="grid gap-3 border-b border-white/7 bg-white/[0.025] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-slate-600 md:grid-cols-[1.4fr_0.8fr_0.8fr_auto]">
+                    <span>Ended market</span>
+                    <span>Outcome</span>
+                    <span>Volume</span>
+                    <span className="text-right">Action</span>
+                  </div>
+                  <div className="divide-y divide-white/7">
+                    {visibleEndedMarkets.map((market) => {
+                      const resolution = resolutionForMarket(market, resolutions);
+                      return (
+                        <div key={market.id} className="grid gap-3 bg-[#0b1219] px-3 py-3 md:grid-cols-[1.4fr_0.8fr_0.8fr_auto] md:items-center">
+                          <div className="grid grid-cols-[36px_1fr] items-center gap-3">
+                            <MarketVisualBadge market={market} size="sm" />
+                            <div>
+                              <p className="line-clamp-2 text-xs font-black text-white">{market.title}</p>
+                              <p className="mt-1 text-[10px] font-bold uppercase text-slate-600">{market.category} / Market #{market.onchain.marketId}</p>
+                            </div>
+                          </div>
+                          <div>
+                            <span className={`inline-flex rounded-lg px-2 py-1 text-[10px] font-black ${resolution.resolved && resolution.outcomeVector !== undefined ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-200"}`}>
+                              {resolution.resolved && resolution.outcomeVector !== undefined ? "Confirmed" : "Pending"}
+                            </span>
+                            <p className="mt-1 font-mono text-[10px] text-slate-600">{formatOutcomeVectorBinary(resolution.outcomeVector, market.atoms.length)}</p>
+                          </div>
+                          <p className="text-xs font-bold text-slate-200">{market.volume.replace("$", "")}</p>
+                          <Link href={`/market/${market.id}`} className="oracle-row-action justify-self-start md:justify-self-end">
+                            Open <ArrowUpRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {visibleBets.length > 0 && (
             <div className="mt-4 overflow-hidden rounded-xl border border-white/7">
               <div className="grid gap-3 border-b border-white/7 bg-white/[0.025] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-slate-600 md:grid-cols-[1.35fr_0.75fr_1fr_auto]">
                 <span>Market</span>
@@ -312,6 +377,8 @@ export default function HistoryPage() {
                 })}
               </div>
             </div>
+              )}
+            </>
           )}
 
           <div className="oracle-board-foot">

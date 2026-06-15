@@ -422,6 +422,9 @@ function getBetResultLabel(input: {
   resolution?: ResolutionHistoryState;
   isPublicLive: boolean;
 }) {
+  if (!input.resolution?.resolved) {
+    return { label: "Pending result", tone: "pending" as const };
+  }
   const vector = input.resolution?.outcomeVector;
   if (vector === undefined) {
     return { label: "Pending result", tone: "pending" as const };
@@ -565,7 +568,8 @@ export function MarketDetailPage() {
   const marketChain = selectedCreatedMarket ? getChainConfig(selectedCreatedMarket.onchain.chainId) : selectedChain;
   const selectedMarketId = typeof router.query.id === "string" ? router.query.id : "";
   const tradingEnded = selectedCreatedMarket ? !isTradingOpen(selectedCreatedMarket.lifecycle) : false;
-  const resolvedOutcomeVector = selectedCreatedMarket?.resolution.outcomeVector;
+  const resolvedOutcomeVector =
+    selectedCreatedMarket?.resolution.status === "resolved" ? selectedCreatedMarket.resolution.outcomeVector : undefined;
   const marketDetail: MarketDetail = selectedMarket
     ? {
         title: selectedMarket.title,
@@ -767,7 +771,7 @@ export function AtomList({ market, onChange }: { market: CreatedMarket; onChange
   const [materializeMessage, setMaterializeMessage] = useState("");
   const [now, setNow] = useState(Date.now());
   const tradingOpen = isTradingOpen(market.lifecycle, now);
-  const outcomeVector = market.resolution.outcomeVector;
+  const outcomeVector = market.resolution.status === "resolved" ? market.resolution.outcomeVector : undefined;
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30_000);
@@ -1082,7 +1086,7 @@ export function BetHistory({ market, onVolumeChange }: { market: CreatedMarket; 
   const visibleBets = historyTab === "personal" ? personalBets : bets;
   const totalStaked = bets.reduce((sum, bet) => sum + bet.publicStake, 0n);
   const personalStaked = personalBets.reduce((sum, bet) => sum + bet.publicStake, 0n);
-  const outcomeText = resolutionState?.outcomeVector !== undefined
+  const outcomeText = resolutionState?.resolved && resolutionState?.outcomeVector !== undefined
     ? `Outcome vector ${resolutionState.outcomeVector ?? "resolved"}`
     : resolutionState?.assertionId
       ? "UMA result pending"

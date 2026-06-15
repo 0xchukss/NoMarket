@@ -7,6 +7,7 @@ import type { Market } from "../lib/mockMarkets";
 import { loadCreatedMarkets, type CreatedMarket } from "../lib/marketStorage";
 import { useSelectedChain } from "../lib/chains/useSelectedChain";
 import { fetchIndexedMarkets, mergeIndexedAndLocalMarkets } from "../lib/marketIndex";
+import { isTradingOpen } from "../lib/marketLifecycle";
 
 function marketSearchText(market: Market | CreatedMarket, networkName: string) {
   const atomText = "atoms" in market ? market.atoms.map((atom) => `${atom.description} ${atom.resolver} ${atom.uma?.question || ""}`).join(" ") : "";
@@ -65,7 +66,9 @@ export default function MarketsPage() {
   }, [chain]);
 
   const displayMarkets = useMemo(() => {
-    return mergeIndexedAndLocalMarkets(indexedMarkets, createdMarkets).filter((market) => market.onchain.chainId === chain.id);
+    return mergeIndexedAndLocalMarkets(indexedMarkets, createdMarkets).filter(
+      (market) => market.onchain.chainId === chain.id && isTradingOpen(market.lifecycle)
+    );
   }, [chain.id, createdMarkets, indexedMarkets]);
 
   const filteredMarkets = useMemo(() => {
@@ -114,8 +117,8 @@ export default function MarketsPage() {
           <MarketRows
             markets={filteredMarkets}
             chain={chain}
-            emptyMessage={hasSearch ? `No ${chain.shortName} markets match this search.` : `No ${chain.shortName} markets yet.`}
-            emptyHint={hasSearch ? "Try another title, category, atom, outcome, or network term." : "Create the first real combinatorial market for this network."}
+            emptyMessage={hasSearch ? `No active ${chain.shortName} markets match this search.` : `No active ${chain.shortName} markets yet.`}
+            emptyHint={hasSearch ? "Try another title, category, atom, outcome, or network term." : "Ended markets are available in History."}
           />
 
           <div className="oracle-board-foot">
@@ -130,7 +133,7 @@ export default function MarketsPage() {
                   ? `${chain.name} is configured for beta actions.`
                   : chain.setupMessage}
             </span>
-            <span>UMA automation stays attached to each market page.</span>
+            <span>Ended markets move to History with outcomes and old bets.</span>
           </div>
         </section>
       </main>

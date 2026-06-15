@@ -2,7 +2,7 @@ import { formatEther } from "viem";
 import { CHAIN_ORDER, getChainConfig, isChainId, type ChainConfig, type ChainId } from "./chains";
 import { buildMarket } from "./mockMarkets";
 import { type CreatedAtom, type CreatedMarket } from "./marketStorage";
-import { createEmptyResolutionState } from "./resolution";
+import { createEmptyResolutionState, type MarketResolutionDraft } from "./resolution";
 import { defaultUmaResolver } from "./switchboardOracle";
 import {
   formatLifecycleDate,
@@ -233,6 +233,40 @@ function toCreatedAtoms(node: IndexedMarketNode): CreatedAtom[] {
   return buildFallbackAtoms(node.atomCount, cleanText(node.title) || "Indexed market");
 }
 
+function parseIndexedOutcomeVector(value: string | undefined) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && Number.isInteger(parsed) ? parsed : undefined;
+}
+
+function resolutionFromIndexedNode(node: IndexedMarketNode, atomCount: number): MarketResolutionDraft {
+  const base = createEmptyResolutionState(atomCount);
+  const outcomeVector = parseIndexedOutcomeVector(node.outcomeVector);
+  const resolved = Boolean(node.resolved && outcomeVector !== undefined);
+
+  if (!resolved) {
+    return {
+      ...base,
+      status: node.assertionId ? "proposed" : "draft",
+      assertionId: node.assertionId || undefined,
+      outcomeVector: undefined
+    };
+  }
+
+  return {
+    ...base,
+    status: "resolved",
+    assertionId: node.assertionId || undefined,
+    outcomeVector,
+    atomOutcomes: Array.from({ length: atomCount }, (_, index) => ({
+      outcome: outcomeVector & (1 << index) ? "true" : "false",
+      evidence: "Resolved by the UMA optimistic resolver.",
+      updatedAt: new Date().toISOString()
+    })),
+    updatedAt: new Date().toISOString()
+  };
+}
+
 function mapIndexedMarket(chain: ChainConfig, node: IndexedMarketNode): CreatedMarket {
   const metadata = parseOnchainMarketMetadata(node.metadata || node.question);
   const atoms = toCreatedAtoms(node);
@@ -269,7 +303,7 @@ function mapIndexedMarket(chain: ChainConfig, node: IndexedMarketNode): CreatedM
       creator: node.creator || "",
       materialized: true
     },
-    resolution: createEmptyResolutionState(atoms.length)
+    resolution: resolutionFromIndexedNode(node, atoms.length)
   };
 }
 
