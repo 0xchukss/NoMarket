@@ -13,22 +13,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        base: "#0A0B0D",
-        surface: "#14161A",
-        input: "#1E2127",
-        border: "#2A2E37",
-        foreground: "#E7E9EC",
-        muted: "#878D99",
-        accent: "#C6F24E",
-        "accent-2": "#7C5CFF",
-        positive: "#34D399",
-        negative: "#F25C5C"
+        border: "hsl(222 18% 22%)",
+        background: "hsl(222 30% 7%)",
+        foreground: "hsl(210 40% 96%)",
+        card: "hsl(215 24% 12%)",
+        muted: "hsl(222 22% 14%)",
+        "muted-foreground": "hsl(214 14% 68%)",
+        accent: "hsl(204 100% 54%)",
+        "accent-foreground": "hsl(210 40% 98%)",
+        danger: "hsl(348 84% 62%)"
       },
       boxShadow: {
         card: "0 14px 34px rgba(0, 0, 0, 0.24)",
-        glow: "0 0 36px rgba(198, 242, 78, 0.18)",
+        glow: "0 0 36px rgba(20, 153, 255, 0.18)",
         panel: "0 18px 50px rgba(0, 0, 0, 0.28)",
-        soft: "0 8px 22px rgba(198, 242, 78, 0.12)"
+        soft: "0 8px 22px rgba(20, 153, 255, 0.22)"
       },
       keyframes: {
         scan: {
