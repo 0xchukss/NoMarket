@@ -12,10 +12,16 @@ NoMarket is a private combinatorial prediction market frontend backed by an EVM 
 
 ```bash
 npm install
-npm run dev
+npm run test
 ```
 
-Open `http://127.0.0.1:3000`.
+## Frontend Replacement & Unit Tests Guide
+
+If you are adding new frontend files to this repository, please note that the TypeScript unit tests (located in `tests/`) depend on core logical helpers that were previously located in `app/lib/`. 
+
+To prevent these unit tests from failing, you must:
+1. **Use the exact same directory structure** (specifically recreating the `app/lib/` folder).
+2. **Export the exact same classes, functions, and types** (e.g., `ExpressionBuilder`, `defaultUmaResolver`, `buildUmaResolutionClaim`, etc.) with the exact same signatures that the tests expect.
 
 ## Sepolia Contract
 
