@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "lib": ["dom", "dom.iterable", "es2021"],
+    "lib": ["es2021"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -11,10 +11,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
     "types": ["mocha", "node"]
   },
-  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "tests/**/*.ts", "scripts/**/*.ts"],
+  "include": ["tests/**/*.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules"]
 }
