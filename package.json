@@ -22,6 +22,10 @@
     "subgraph:zama:deploy": "cd subgraphs/nomarketzama && npm run deploy"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.9",
+    "@swc/helpers": "^0.5.23",
+    "@tanstack/react-query": "^5.90.12",
+    "@zama-fhe/react-sdk": "^3.0.0",
     "@zama-fhe/sdk": "^3.0.0",
     "viem": "^2.38.3",
     "wagmi": "^2.19.2"
