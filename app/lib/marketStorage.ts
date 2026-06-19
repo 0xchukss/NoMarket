@@ -166,6 +166,12 @@ export function saveCreatedMarket(market: CreatedMarket) {
   window.localStorage.setItem(CREATED_MARKETS_KEY, JSON.stringify([market, ...existingMarkets]));
 }
 
+export function deleteCreatedMarket(id: string) {
+  if (typeof window === "undefined") return;
+  const markets = loadCreatedMarkets().filter((m) => m.id !== id);
+  window.localStorage.setItem(CREATED_MARKETS_KEY, JSON.stringify(markets));
+}
+
 export function updateCreatedMarket(updatedMarket: CreatedMarket) {
   if (typeof window === "undefined") {
     return;

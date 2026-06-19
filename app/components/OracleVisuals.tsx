@@ -1,3 +1,4 @@
+import type React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Activity, ArrowUpRight, BarChart3, CheckCircle2, CircleDollarSign, LockKeyhole, Network, Sparkles, XCircle } from "lucide-react";
@@ -10,6 +11,68 @@ import { isTradingOpen } from "../lib/marketLifecycle";
 import { MarketVisualBadge } from "./MarketVisualBadge";
 
 const nodeTags = ["Boolean claims", "Private liquidity", "UMA automation", "Encrypted payouts", "Conditional markets"];
+
+export function VeilMascot({ size = 48, className = "", style }: { size?: number; className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="veilGlow" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stopColor="rgba(244,213,141,0.18)" />
+          <stop offset="100%" stopColor="transparent" />
+        </radialGradient>
+      </defs>
+      {/* Hood silhouette */}
+      <path
+        d="M32 6 C18 6 10 16 10 28 L10 50 C10 52 12 54 14 54 L50 54 C52 54 54 52 54 50 L54 28 C54 16 46 6 32 6 Z"
+        fill="rgba(12,16,22,0.92)"
+        stroke="rgba(244,213,141,0.22)"
+        strokeWidth="0.8"
+      />
+      {/* Hood edge dissolving into cipher */}
+      <path
+        d="M32 6 C18 6 10 16 10 28"
+        stroke="rgba(244,213,141,0.14)"
+        strokeWidth="0.5"
+        strokeDasharray="2 3"
+      />
+      <path
+        d="M32 6 C46 6 54 16 54 28"
+        stroke="rgba(168,85,247,0.14)"
+        strokeWidth="0.5"
+        strokeDasharray="2 3"
+      />
+      {/* Left eye — gold */}
+      <circle cx="25" cy="32" r="2.5" fill="#f4d58d" opacity="0.9" />
+      <circle cx="25" cy="32" r="1" fill="#fffbe6" />
+      {/* Right eye — purple */}
+      <circle cx="39" cy="32" r="2.5" fill="#a855f7" opacity="0.9" />
+      <circle cx="39" cy="32" r="1" fill="#e9d5ff" />
+      {/* Floating cipher symbols */}
+      <text x="14" y="20" fontSize="3.5" fill="rgba(244,213,141,0.28)" fontFamily="monospace">∧</text>
+      <text x="46" y="20" fontSize="3.5" fill="rgba(168,85,247,0.28)" fontFamily="monospace">∨</text>
+      <text x="8" y="36" fontSize="3" fill="rgba(244,213,141,0.18)" fontFamily="monospace">0</text>
+      <text x="53" y="36" fontSize="3" fill="rgba(168,85,247,0.18)" fontFamily="monospace">1</text>
+    </svg>
+  );
+}
+
+export function VeilEmptyState({ message, hint }: { message: string; hint?: string }) {
+  return (
+    <div className="grid place-items-center gap-3 py-10 text-center">
+      <VeilMascot size={56} className="opacity-60" />
+      <p className="font-serif text-base font-black text-slate-100">{message}</p>
+      {hint && <p className="font-mono text-[11px] text-slate-500">{hint}</p>}
+    </div>
+  );
+}
 
 export function OracleFormulaVeil() {
   return (
@@ -272,8 +335,7 @@ export function MarketRows({
       </div>
       {rows.length === 0 && (
         <div className="oracle-table-empty">
-          <p>{emptyMessage}</p>
-          <span>{emptyHint}</span>
+          <VeilEmptyState message={emptyMessage} hint={emptyHint} />
         </div>
       )}
       {rows.map((market) => {

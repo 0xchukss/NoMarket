@@ -23,7 +23,7 @@ import {
 import { describeUmaRule } from "../lib/switchboardOracle";
 import { Header } from "./Header";
 import { MarketVisualBadge } from "./MarketVisualBadge";
-import { OracleFormulaVeil, OraclePriceChart, OracleStatLedger, OracleSummaryModules, ProbabilityInputCard } from "./OracleVisuals";
+import { OraclePriceChart, OracleStatLedger, OracleSummaryModules, ProbabilityInputCard } from "./OracleVisuals";
 import { WalletConnect } from "./WalletConnect";
 import { getChainConfig, privacyLabel } from "../lib/chains";
 import { useSelectedChain } from "../lib/chains/useSelectedChain";
@@ -604,9 +604,8 @@ export function MarketDetailPage() {
   );
 
   return (
-    <div className="oracle-page">
+    <div style={{ background: "var(--oracle-bg)", minHeight: "100vh" }}>
       <Header />
-      <OracleFormulaVeil />
       <main className="oracle-detail-page">
         <Link href="/markets" className="oracle-back-link">
           <ChevronLeft className="h-4 w-4" />
@@ -649,6 +648,7 @@ export function MarketDetailPage() {
                   <OracleStatLedger />
                 )}
                 <RulesSection chain={marketChain} />
+                <FAQAccordion />
               </div>
 
               <aside className="oracle-detail-right">
@@ -1375,7 +1375,78 @@ export function UmaResolutionPanel({ market, onChange }: { market: CreatedMarket
     };
   }, [activeAssertionId, isLiveEvmChain, market, market.onchain.chainId, market.onchain.materialized, market.onchain.marketId, resolved]);
 
-  return null;
+  if (!isLiveEvmChain || !market.onchain.materialized) return null;
+
+  return (
+    <section className="mt-5 rounded-2xl border border-white/8 bg-card p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-black text-white">Resolution status</h2>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            The UMA bot monitors this market and proposes the outcome vector once resolution time is reached.
+          </p>
+        </div>
+        <span className={`inline-flex items-center gap-2 rounded-lg border px-2 py-1 text-[10px] font-black uppercase ${
+          botStatus === "resolved"
+            ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
+            : botStatus === "proposed"
+              ? "border-purple-400/20 bg-purple-400/10 text-purple-200"
+              : "border-amber-300/20 bg-amber-300/10 text-amber-100"
+        }`}>
+          {botStatus === "resolved"
+            ? <CheckCircle2 className="h-3.5 w-3.5" />
+            : botStatus === "proposed"
+              ? <Lock className="h-3.5 w-3.5" />
+              : <Clock className="h-3.5 w-3.5" />}
+          {botStatusLabel}
+        </span>
+      </div>
+
+      {(botStatus === "scheduled" || botStatus === "watching") && (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Resolution time</p>
+            <p className="mt-1 text-sm font-black text-white">{formatLifecycleDate(market.lifecycle.resolutionTime)}</p>
+          </div>
+          <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Dispute window</p>
+            <p className="mt-1 text-sm font-black text-white">2h UMA liveness</p>
+            <p className="mt-1 text-[11px] text-slate-500">Challengers have 2 hours to dispute the proposed outcome.</p>
+          </div>
+        </div>
+      )}
+
+      {botStatus === "proposed" && activeAssertionId && (
+        <div className="mt-4 rounded-xl border border-purple-400/20 bg-purple-400/8 p-3">
+          <p className="text-[10px] font-black uppercase tracking-wide text-purple-300">UMA assertion ID</p>
+          <p className="mt-2 break-all font-mono text-xs font-bold text-slate-200">{activeAssertionId}</p>
+          {proposalTx && (
+            <p className="mt-2 break-all font-mono text-[10px] text-slate-500">Proposal tx: {proposalTx}</p>
+          )}
+        </div>
+      )}
+
+      {resolved && displayedVector !== undefined && (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/8 p-3">
+            <p className="text-[10px] font-black uppercase tracking-wide text-emerald-300">Outcome vector</p>
+            <p className="mt-1 text-2xl font-black text-white">{displayedVector}</p>
+            <p className="mt-1 font-mono text-[11px] text-slate-500">{formatOutcomeVectorBinary(displayedVector, market.atoms.length)}</p>
+          </div>
+          {(resolvedTx || proposalTx) && (
+            <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+              <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Settlement tx</p>
+              <p className="mt-2 break-all font-mono text-[10px] text-slate-400">{resolvedTx || proposalTx}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {botMessage && (
+        <p className="mt-3 text-xs font-bold leading-5 text-slate-400">{botMessage}</p>
+      )}
+    </section>
+  );
 }
 
 export function MarketHeader({ market, marketId, chainName }: { market: MarketDetail; marketId: string; chainName: string }) {
@@ -1433,24 +1504,71 @@ export function OutcomeRow({ outcome, marketId, showButtons }: { outcome: Outcom
 }
 
 export function RulesSection({ chain }: { chain: ReturnType<typeof getChainConfig> }) {
+  const [activeTab, setActiveTab] = useState<"rules" | "context">("rules");
+  const [showMore, setShowMore] = useState(false);
   const isZama = chain.id === "zama";
-  const privacyText = isZama
-    ? "Bet expression data is encrypted with Zama FHE while the wallet transaction still shows the public stake and gas."
-    : `${chain.shortName} beta records the public expression masks and stake supported by that network.`;
+
+  const privacyShort = isZama
+    ? "Bet expression data is encrypted with Zama FHE."
+    : `${chain.shortName} beta records the public expression masks and stake.`;
+
+  const privacyFull = isZama
+    ? "Bet expression data is encrypted with Zama FHE before it is submitted to the smart contract. The on-chain transaction shows only the public stake amount and gas cost. The encrypted handles are stored on-chain but the position is unreadable without the private key."
+    : `${chain.shortName} beta records the full expression masks, care masks, and stake on-chain. This is a public beta network. Treat all positions as visible to anyone reading the chain.`;
 
   return (
     <section className="mt-5 rounded-2xl border border-white/8 bg-card p-4">
       <div className="flex gap-5 border-b border-white/7 pb-3 text-xs font-black">
-        <button className="text-white">Rules</button>
-        <button className="text-slate-500 hover:text-slate-300">Market Context</button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("rules")}
+          className={activeTab === "rules" ? "text-white" : "text-slate-500 hover:text-slate-300"}
+        >
+          Rules
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("context")}
+          className={activeTab === "context" ? "text-white" : "text-slate-500 hover:text-slate-300"}
+        >
+          Market Context
+        </button>
       </div>
-      <div className="mt-4 space-y-3 text-xs leading-6 text-slate-300">
-        <p>This market runs on {chain.name} and resolves through the automated UMA optimistic resolver bot.</p>
-        <p>
-          Bets can be expressed as Boolean combinations across atoms. {privacyText}
-          <button className="ml-1 font-bold text-blue-300 hover:text-blue-200">Show more</button>
-        </p>
-      </div>
+
+      {activeTab === "rules" && (
+        <div className="mt-4 space-y-3 text-xs leading-6 text-slate-300">
+          <p>This market runs on {chain.name} and resolves through the automated UMA optimistic resolver bot.</p>
+          <p>
+            Bets can be expressed as Boolean combinations across atoms. {showMore ? privacyFull : privacyShort}
+            {!showMore && (
+              <button type="button" onClick={() => setShowMore(true)} className="ml-1 font-bold text-blue-300 hover:text-blue-200">
+                Show more
+              </button>
+            )}
+          </p>
+          {showMore && (
+            <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3 text-[11px] leading-5 text-slate-400">
+              <p>The UMA Optimistic Oracle V3 resolves market outcomes by asserting the combinatorial outcome vector during the resolution buffer. Anyone can propose an outcome. Disputes trigger a 2-hour challenge window. If no challenge is raised, the outcome is finalized on-chain.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "context" && (
+        <div className="mt-4 space-y-3 text-xs leading-6 text-slate-300">
+          <p>Each atom in this market represents a binary true/false event. The resolver reads each atom independently and encodes the result into a binary outcome vector.</p>
+          <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Resolver</p>
+            <p className="mt-1 font-bold text-white">UMA Optimistic Oracle V3</p>
+            <p className="mt-2 text-[11px] text-slate-500">{chain.name} / {chain.shortName}</p>
+          </div>
+          <div className="rounded-xl border border-white/7 bg-[#0b1219] p-3">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-600">Privacy model</p>
+            <p className="mt-1 font-bold text-white">{isZama ? "Zama FHE encrypted" : "Public expression masks"}</p>
+            <p className="mt-2 text-[11px] text-slate-500">{privacyFull}</p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -1561,6 +1679,12 @@ export function CombiTradePanel({
       setLastConfirmedHash(txHash);
     }
   }, [lastConfirmedHash, onBetConfirmed, receipt.isSuccess, submittedStakeWei, txHash]);
+
+  useEffect(() => {
+    if (status !== "submitted") return;
+    const timer = setTimeout(() => setStatus("idle"), 6000);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   function chooseBinarySide(side: "yes" | "no") {
     const quickMinterm = side === "yes" ? { outcomeMask: 1, careMask: 1 } : { outcomeMask: 0, careMask: 1 };

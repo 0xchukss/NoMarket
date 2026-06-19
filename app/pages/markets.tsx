@@ -1,16 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Plus, Search, X } from "lucide-react";
+import { useAccount } from "wagmi";
 import { Header } from "../components/Header";
-import { MarketRows, NetworkTabs, OracleFormulaVeil } from "../components/OracleVisuals";
-import type { Market } from "../lib/mockMarkets";
+import { MarketsPageHeader } from "../components/MarketsPageHeader";
+import { MarketsNetworkTabs } from "../components/MarketsNetworkTabs";
+import { MarketsCategoryFilter } from "../components/MarketsCategoryFilter";
+import { MarketsTable } from "../components/MarketsTable";
+import { MarketsStatusLine } from "../components/MarketsStatusLine";
+import { filterTabs, type Market } from "../lib/mockMarkets";
 import { loadCreatedMarkets, type CreatedMarket } from "../lib/marketStorage";
 import { useSelectedChain } from "../lib/chains/useSelectedChain";
 import { fetchIndexedMarkets, mergeIndexedAndLocalMarkets } from "../lib/marketIndex";
 import { isTradingOpen } from "../lib/marketLifecycle";
+import type { ChainConfig } from "../lib/chains";
+
+async function fetchUserPositionIds(chain: ChainConfig, address: string): Promise<Set<string>> {
+  if (!chain.subgraphUrl) return new Set();
+  try {
+    const res = await fetch(chain.subgraphUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: `query UserPositions($bettor: String!){bets(where:{bettor:$bettor},first:100){marketId}}`,
+        variables: { bettor: address.toLowerCase() },
+      }),
+    });
+    if (!res.ok) return new Set();
+    const json = await res.json();
+    return new Set<string>((json.data?.bets ?? []).map((b: { marketId: string }) => String(b.marketId)));
+  } catch {
+    return new Set();
+  }
+}
+
+const CATEGORY_TABS = filterTabs;
 
 function marketSearchText(market: Market | CreatedMarket, networkName: string) {
-  const atomText = "atoms" in market ? market.atoms.map((atom) => `${atom.description} ${atom.resolver} ${atom.uma?.question || ""}`).join(" ") : "";
+  const atomText =
+    "atoms" in market
+      ? market.atoms
+          .map((atom) => `${atom.description} ${atom.resolver} ${atom.uma?.question || ""}`)
+          .join(" ")
+      : "";
   return [
     market.title,
     market.category,
@@ -20,18 +50,21 @@ function marketSearchText(market: Market | CreatedMarket, networkName: string) {
     networkName,
     ...(market.visual?.assets || []).map((asset) => `${asset.label} ${asset.alt}`),
     ...market.outcomes.map((outcome) => outcome.label),
-    atomText
+    atomText,
   ]
     .join(" ")
     .toLowerCase();
 }
 
 export default function MarketsPage() {
+  const { address } = useAccount();
   const [createdMarkets, setCreatedMarkets] = useState<CreatedMarket[]>([]);
   const [indexedMarkets, setIndexedMarkets] = useState<CreatedMarket[]>([]);
   const [indexStatus, setIndexStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [indexError, setIndexError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [positionMarketIds, setPositionMarketIds] = useState<Set<string>>(new Set());
   const { chain } = useSelectedChain();
 
   useEffect(() => {
@@ -44,9 +77,7 @@ export default function MarketsPage() {
     setIndexError("");
     if (!chain.subgraphUrl || !chain.enabled) {
       setIndexStatus("idle");
-      return () => {
-        cancelled = true;
-      };
+      return () => { cancelled = true; };
     }
     setIndexStatus("loading");
     fetchIndexedMarkets(chain)
@@ -60,9 +91,7 @@ export default function MarketsPage() {
         setIndexError(error instanceof Error ? error.message : "Unable to load shared markets.");
         setIndexStatus("error");
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [chain]);
 
   const displayMarkets = useMemo(() => {
@@ -73,69 +102,79 @@ export default function MarketsPage() {
 
   const filteredMarkets = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return displayMarkets;
-    return displayMarkets.filter((market) => marketSearchText(market, chain.shortName).includes(query));
-  }, [chain.shortName, displayMarkets, searchQuery]);
+    return displayMarkets
+      .filter((market) => activeCategory === "All" || market.category === activeCategory)
+      .filter((market) => !query || marketSearchText(market, chain.shortName).includes(query));
+  }, [activeCategory, chain.shortName, displayMarkets, searchQuery]);
+
+  useEffect(() => {
+    if (!address || !chain.subgraphUrl) {
+      setPositionMarketIds(new Set());
+      return;
+    }
+    fetchUserPositionIds(chain, address).then(setPositionMarketIds).catch(() => setPositionMarketIds(new Set()));
+  }, [address, chain]);
 
   const hasSearch = searchQuery.trim().length > 0;
+  const totalLive = displayMarkets.length;
 
   return (
-    <div className="oracle-page">
+    <div style={{ backgroundColor: "var(--nm-bg)", minHeight: "100vh" }}>
       <Header />
-      <OracleFormulaVeil />
-      <main className="oracle-markets-page">
-        <NetworkTabs />
 
-        <section className="oracle-market-board oracle-panel">
-          <div className="oracle-board-head">
-            <div>
-              <p className="oracle-kicker">{chain.shortName} network</p>
-              <h1>All Markets</h1>
-            </div>
-            <div className="oracle-board-actions">
-              <div className="oracle-search">
-                <Search className="h-4 w-4" />
-                <input
-                  aria-label="Search markets"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search markets"
-                />
-                {hasSearch && (
-                  <button type="button" onClick={() => setSearchQuery("")} aria-label="Clear market search">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-              <Link href="/create" className="oracle-gold-button compact">
-                <Plus className="h-4 w-4" />
-                Create
-              </Link>
-            </div>
-          </div>
+      <MarketsPageHeader
+        chainShortName={chain.shortName}
+        totalLive={totalLive}
+        indexStatus={indexStatus}
+      />
 
-          <MarketRows
-            markets={filteredMarkets}
-            chain={chain}
-            emptyMessage={hasSearch ? `No active ${chain.shortName} markets match this search.` : `No active ${chain.shortName} markets yet.`}
-            emptyHint={hasSearch ? "Try another title, category, atom, outcome, or network term." : "Ended markets are available in History."}
-          />
+      <MarketsNetworkTabs />
 
-          <div className="oracle-board-foot">
-            <span>
-              {indexStatus === "loading"
-                ? `Loading shared ${chain.shortName} markets from the subgraph...`
-                : indexStatus === "error"
-                  ? indexError
-                  : hasSearch
-                ? `${filteredMarkets.length} result${filteredMarkets.length === 1 ? "" : "s"} for "${searchQuery.trim()}".`
-                : chain.enabled
-                  ? `${chain.name} is configured for beta actions.`
-                  : chain.setupMessage}
-            </span>
-            <span>Ended markets move to History with outcomes and old bets.</span>
-          </div>
-        </section>
+      <main
+        style={{
+          width: "min(100%, 1100px)",
+          margin: "0 auto",
+          padding: "0 20px 80px",
+        }}
+      >
+
+
+        <MarketsCategoryFilter
+          categories={CATEGORY_TABS}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+
+        <MarketsTable
+          markets={filteredMarkets}
+          chain={chain}
+          positionMarketIds={positionMarketIds}
+          emptyMessage={
+            hasSearch
+              ? `No ${chain.shortName} markets match this search.`
+              : activeCategory !== "All"
+              ? `No ${activeCategory} markets are live on ${chain.shortName}.`
+              : `No active markets on ${chain.shortName} yet.`
+          }
+          emptyHint={
+            hasSearch
+              ? "Try a different title, category, atom, or outcome term."
+              : address
+              ? "Ended markets move to History. Create one to start trading."
+              : "Connect your wallet, then create a market to start trading."
+          }
+        />
+
+        <MarketsStatusLine
+          indexStatus={indexStatus}
+          indexError={indexError}
+          hasSearch={hasSearch}
+          resultCount={filteredMarkets.length}
+          searchQuery={searchQuery}
+          chain={chain}
+        />
       </main>
     </div>
   );

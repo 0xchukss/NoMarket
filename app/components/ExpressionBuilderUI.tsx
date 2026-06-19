@@ -69,7 +69,7 @@ export function ExpressionBuilderUI({ atoms, embedded = false, privacyNote, onCh
   }
 
   return (
-    <section className={embedded ? "" : "rounded-2xl border border-white/8 bg-card p-4"}>
+    <section data-tour-id="expression-builder" className={embedded ? "" : "rounded-2xl border border-white/8 bg-card p-4"}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-black text-white">Expression Builder</h2>
         <select
